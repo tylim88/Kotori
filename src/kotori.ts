@@ -91,10 +91,10 @@ export const kotori = <
 				) => {
 					let locale = dictCallbacks[key]!().translation[languageTag]
 
-					for (const objKey in args) {
+					for (const objKey in args[0]) {
 						locale = locale.replace(
 							new RegExp(`\\{\\{\\s*${objKey}\\s*\\}\\}`, 'g'),
-							() => String(args[objKey]),
+							() => String(args[0]?.[objKey]),
 						)
 					}
 					return locale
