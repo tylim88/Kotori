@@ -3,9 +3,13 @@
 Strongly-typed, modular i18n for React. Variables are inferred directly from your strings — no codegen, no JSON, no schema files.
 
 ```ts
-const intro = dict({ en: 'Hello {{name}}', zh: '你好 {{name}}' })
+const intro = dict({ 
+    en: 'Hello {{name}}', // base string drives the type contract
+    zh: '你好 {{name}}',  // ✅ 
+    ms: 'Hai {{nama}}'  // ❌ compile error: unknown key 'nama' 
+})
 
-t('intro', { name: 'John' }) // ✅ typed
+t('intro', { name: 'John' }) // ✅ 
 t('intro')                   // ❌ compile error: missing { name }
 t('intro', { nama: 'John' }) // ❌ compile error: unknown key 'nama'
 ```
