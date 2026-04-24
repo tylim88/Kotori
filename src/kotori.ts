@@ -31,6 +31,8 @@ export const kotori = <
 	type WorkingTags = PrimaryTag | SecondaryTags
 	let languageTag: WorkingTags = props.primaryLanguageTag
 
+	const snapshots = new Map<symbol, object>()
+
 	return {
 		dict:
 			<
@@ -72,11 +74,14 @@ export const kotori = <
 		>(
 			dictCallbacks: DictCallbacks,
 		) => {
-			const createSnapshot = () => ({
+			const s = Symbol()
+			const snapshotBuilder = () => ({
 				getLanguage: () => languageTag,
 				setLanguage: (tag: WorkingTags) => {
 					languageTag = tag
-					currentSnapshot = createSnapshot()
+					snapshots.forEach((snapshot, key) => {
+						snapshots.set(key, { ...snapshot })
+					})
 					listeners.forEach((listener) => {
 						listener()
 					})
@@ -89,8 +94,8 @@ export const kotori = <
 						? []
 						: [NonNullable<ReturnType<DictCallbacks[Key]>[typeof _args]>]
 				) => {
-					let locale = dictCallbacks[key]!().translation[languageTag]
-
+					let locale = dictCallbacks[key]?.().translation[languageTag]
+					if (!locale) return
 					for (const objKey in args[0]) {
 						locale = locale.replace(
 							new RegExp(`\\{\\{\\s*${objKey}\\s*\\}\\}`, 'g'),
@@ -100,7 +105,7 @@ export const kotori = <
 					return locale
 				},
 			})
-			let currentSnapshot = createSnapshot()
+			snapshots.set(s, snapshotBuilder())
 			return {
 				useTranslations: () =>
 					useSyncExternalStore(
@@ -108,7 +113,7 @@ export const kotori = <
 							listeners.add(listener)
 							return () => listeners.delete(listener)
 						},
-						() => currentSnapshot,
+						() => snapshots.get(s) as ReturnType<typeof snapshotBuilder>,
 					),
 			}
 		},

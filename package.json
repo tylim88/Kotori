@@ -1,13 +1,14 @@
 {
 	"name": "kotori",
 	"description": "Strongly-typed and composable internationalization library for React",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"scripts": {
 		"setup": "rm -rf node_modules && npm i && git init && husky",
 		"prepublishOnly": "npm run build",
 		"build": "tsdown",
 		"test": "vitest",
-		"lint": "npx @biomejs/biome check --write"
+		"lint": "npx @biomejs/biome check --write",
+		"dev": "vite --host"
 	},
 	"files": [
 		"dist"
@@ -36,6 +37,8 @@
 		"@biomejs/biome": "^2.4.12",
 		"@types/node": "^25.6.0",
 		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"@vitejs/plugin-react": "^6.0.1",
 		"@vitest/coverage-v8": "^4.1.5",
 		"bcp47-language-tags": "^1.1.0",
 		"husky": "^9.1.7",

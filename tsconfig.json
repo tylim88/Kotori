@@ -7,6 +7,7 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"module": "esnext",
+		"jsx": "react-jsx",
 		"forceConsistentCasingInFileNames": true,
 		"esModuleInterop": true,
 		"moduleResolution": "bundler",
