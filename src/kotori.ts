@@ -33,6 +33,19 @@ export const kotori = <
 
 	const snapshots = new Map<symbol, object>()
 
+	const languageTagMethod = {
+		getLanguage: () => languageTag,
+		setLanguage: (tag: WorkingTags) => {
+			languageTag = tag
+			snapshots.forEach((snapshot, key) => {
+				snapshots.set(key, { ...snapshot })
+			})
+			listeners.forEach((listener) => {
+				listener()
+			})
+		},
+	}
+
 	return {
 		dict:
 			<
@@ -75,17 +88,9 @@ export const kotori = <
 			dictCallbacks: DictCallbacks,
 		) => {
 			const s = Symbol()
-			const snapshotBuilder = () => ({
-				getLanguage: () => languageTag,
-				setLanguage: (tag: WorkingTags) => {
-					languageTag = tag
-					snapshots.forEach((snapshot, key) => {
-						snapshots.set(key, { ...snapshot })
-					})
-					listeners.forEach((listener) => {
-						listener()
-					})
-				},
+			let refCount = 0
+			const snapshot = {
+				...languageTagMethod,
 				t: <Key extends keyof DictCallbacks>(
 					key: Key,
 					...args: keyof NonNullable<
@@ -104,16 +109,27 @@ export const kotori = <
 					}
 					return locale
 				},
-			})
-			snapshots.set(s, snapshotBuilder())
+			}
+			snapshots.set(s, snapshot)
 			return {
 				useTranslations: () =>
 					useSyncExternalStore(
 						(listener) => {
+							// this redundancy is needed to prevent strict mode from crashing
+							if (refCount === 0) {
+								snapshots.set(s, snapshot)
+							}
+							refCount++
 							listeners.add(listener)
-							return () => listeners.delete(listener)
+							return () => {
+								refCount--
+								if (refCount === 0) {
+									snapshots.delete(s)
+								}
+								listeners.delete(listener)
+							}
 						},
-						() => snapshots.get(s) as ReturnType<typeof snapshotBuilder>,
+						() => snapshots.get(s) as typeof snapshot,
 					),
 			}
 		},

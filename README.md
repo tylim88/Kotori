@@ -13,7 +13,7 @@ t('intro', { nama: 'John' }) // ❌ compile error: unknown key 'nama'
 - No codegen
 - No JSON
 - No dependencies
-- 0.31kb gzipped
+- 0.39kb gzipped
 - Modular and tree-shakeable
 - Language change in one page rerenders all pages
 - Variables typed and inferred from string literals
@@ -143,7 +143,7 @@ export const Page2 = () => {
 
 `kotori` holds the language state. All `createTranslations` calls share that state — changing the language anywhere rerenders everywhere.
 
-### One `createTranslations` per page/feature
+### One `createTranslations` per page/component/feature
 
 Translations are colocated with the component that uses them. Bundlers naturally code-split them, so each page only loads what it needs.
 
