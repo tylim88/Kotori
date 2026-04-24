@@ -1,7 +1,7 @@
 {
 	"name": "kotori",
 	"description": "Strongly-typed and composable internationalization library for React",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"scripts": {
 		"setup": "rm -rf node_modules && npm i && git init && husky",
 		"prepublishOnly": "npm run build",
@@ -11,8 +11,7 @@
 		"dev": "vite --host"
 	},
 	"files": [
-		"dist",
-		"image.png"
+		"dist"
 	],
 	"lint-staged": {
 		"*": [
