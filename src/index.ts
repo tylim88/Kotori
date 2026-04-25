@@ -70,7 +70,7 @@ export const kotori = <
 				const ArgsType extends Record<
 					ExtractVariables<PrimaryString>,
 					string | number
-				> = Record<ExtractVariables<PrimaryString>, string>,
+				> = Record<ExtractVariables<PrimaryString>, string | number>,
 			>() =>
 				({ translation }) as Readonly<{
 					translation: typeof translation

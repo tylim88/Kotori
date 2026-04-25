@@ -16,7 +16,7 @@ const intro = dict({
     zh: '你好，现在是 {{time}} 吗？',
     // ❌ TypeScript error: unknown key 'nam'      
     ms: 'Hai {{nam}}, adakah pukul {{time}} sekarang?'  
-// optional: type your arguments, by default it's `Record<'name'|'time', string>` in this example
+// optional: type your arguments, by default it's `Record<'name'|'time', string | number>` in this example
 })<{name: string; time: `${number}:${number}`}> 
 
 // ✅ Works
@@ -75,7 +75,7 @@ const time = dict({
     zh: '时间 {{time}}',
     ja: '時間 {{time}}',
     ms: 'waktu {{time}}',
-// optional: type your arguments, by default it's `Record<'time', string>` in this example
+// optional: type your arguments, by default it's `Record<'time', string | number>` in this example
 })<{ time: `${number}:${number}:${number}` }> 
 
 const { useTranslations } = createTranslations({
