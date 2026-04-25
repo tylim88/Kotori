@@ -52,7 +52,7 @@ npm i kotori
 ```ts
 import { kotori } from './kotori'
 
-export const { createTranslations, dict } = kotori({
+export const { createTranslations, dict, setLanguage } = kotori({
     primaryLanguageTag: 'en',
     secondaryLanguageTags: ['zh', 'ja', 'ms'],
 })
@@ -83,13 +83,13 @@ const { useTranslations } = createTranslations({
     time,
 })
 
-
 export const Page1 = () => {
-    const { t, setLanguage } = useTranslations()
+    const { t, language, setLanguage } = useTranslations()
     return (
         <>
             <select
                 name="language"
+                value={language}
                 onChange={(e) => setLanguage(e.target.value as 'en')}
             >
                 <option value="en">English</option>
@@ -131,17 +131,18 @@ const lastLogin = dict({
 })<{ date: `${number}-${number}-${number}`; time: `${number}:${number}` }>
 
 const { useTranslations } = createTranslations({
-    greeting,
+    weather,
     score,
     lastLogin,
 })
 
 export const Page2 = () => {
-    const { t, setLanguage } = useTranslations()
+    const { t, language, setLanguage } = useTranslations()
     return (
         <>
             <select
                 name="language"
+                value={language}
                 onChange={(e) => setLanguage(e.target.value as 'en')}
             >
                 <option value="en">English</option>
@@ -185,7 +186,7 @@ const mismatch = dict({ en: 'Hi {{name}}', zh: '你好 {{other}}' })
 
 ### Custom argument types
 
-By default, variables are typed as `string`. Pass a generic to narrow them:
+By default, variables are typed as `string | number`. Pass a generic to narrow them:
 
 ```ts
 const time = dict({ en: '{{hour}}:{{minute}}' })<{
@@ -205,33 +206,35 @@ Creates a scoped i18n instance.
 | `primaryLanguageTag` | `AllTags` | The source language. Drives variable inference. |
 | `secondaryLanguageTags` | `AllTags[]` | Additional supported languages. |
 
-Returns `{ dict, createTranslations }`.
+Returns `{ dict, createTranslations, setLanguage }`.
 
 ### `dict(translations)<argsType?>`
 
-Defines a translation unit. Takes one string per language. Optionally takes a generic to type the interpolated variables.
-
-Returns `() => { translations: Record<string, string> }`.
+Defines a translation unit. Takes one string per language. Optionally takes a generic to narrow the interpolated variable types.
 
 ### `createTranslations(dicts)`
 
 Registers a set of dicts and returns `{ useTranslations }`. Call once per page or feature module.
 
+### `setLanguage(tag)`
+
+Updates the current language and rerenders all active `useTranslations` consumers across all pages. Available directly on the `kotori` instance — useful for calling outside of React (route guards, axios interceptors, etc.).
+
 ### `useTranslations()`
 
-React hook. Returns `{ t, getLanguage, setLanguage }`.
+React hook. Returns `{ t, language, setLanguage }`.
 
-| return | description |
-| --- | --- |
-| `t(key, args?)` | Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't. |
-| `getLanguage()` | Returns the current language tag. |
-| `setLanguage(tag)` | Updates the language and rerenders all active `useTranslations` consumers. |
+| return | type | description |
+| --- | --- | --- |
+| `t(key, args?)` | `string` | Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't. |
+| `language` | `WorkingTags` | The current language tag as a reactive value. Updates when `setLanguage` is called. |
+| `setLanguage(tag)` | `void` | Updates the language and rerenders all active `useTranslations` consumers. |
 
 ## Language Tags
 
 kotori uses [BCP 47](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) language tags. Both subtags (`en`, `zh`) and full tags (`en-US`, `zh-Hans`) are accepted and validated at the type level.
 
-## Trivial  
+## Trivial
 
 There are already a lot of i18n libraries, and the good names are mostly taken. The original plan was *kotoba* (言葉), the Japanese word for "words" — also taken. Claude suggested *kotori* as an alternative, and it stuck.
 
