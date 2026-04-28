@@ -41,6 +41,12 @@ export const kotori = <
 			listener()
 		})
 	}
+	const subscribe = (listener: () => void) => {
+		listeners.add(listener)
+		return () => {
+			listeners.delete(listener)
+		}
+	}
 
 	return {
 		setLanguage,
@@ -112,12 +118,7 @@ export const kotori = <
 			return {
 				useTranslations: () =>
 					useSyncExternalStore(
-						(listener) => {
-							listeners.add(listener)
-							return () => {
-								listeners.delete(listener)
-							}
-						},
+						subscribe,
 						() => snapshots.get(s) as typeof snapshot,
 						() => snapshot,
 					),
