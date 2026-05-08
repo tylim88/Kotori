@@ -1,5 +1,5 @@
 import type { BCP47LanguageTagName } from 'bcp47-language-tags'
-import { useSyncExternalStore } from 'react'
+import { useMemo, useSyncExternalStore } from 'react'
 
 export type Tags = BCP47LanguageTagName
 export type SubTags = BCP47LanguageTagName extends `${infer SubTag}-${string}`
@@ -31,7 +31,9 @@ export const kotori = <
 	type WorkingTags = PrimaryTag | SecondaryTags
 	let languageTag: WorkingTags = props.primaryLanguageTag
 
-	const snapshots = new Map<symbol, object>()
+	const snapshots = new Map<string | symbol, object>()
+	const refcount = new Map<string | symbol, number>()
+
 	const setLanguage = (tag: WorkingTags) => {
 		languageTag = tag
 		snapshots.forEach((snapshot, key) => {
@@ -40,12 +42,6 @@ export const kotori = <
 		listeners.forEach((listener) => {
 			listener()
 		})
-	}
-	const subscribe = (listener: () => void) => {
-		listeners.add(listener)
-		return () => {
-			listeners.delete(listener)
-		}
 	}
 
 	return {
@@ -79,7 +75,7 @@ export const kotori = <
 					translation: typeof translation
 					[_args]?: ArgsType
 				}>,
-		createTranslations: <
+		useTranslations: <
 			const DictCallbacks extends Record<
 				string,
 				() => Readonly<{
@@ -89,40 +85,64 @@ export const kotori = <
 			>,
 		>(
 			dictCallbacks: DictCallbacks,
+			uniqueKey?: string,
+			index?: number,
 		) => {
-			const s = Symbol()
-			const snapshot = {
-				language: languageTag,
-				setLanguage,
-				t: <Key extends keyof DictCallbacks>(
-					key: Key,
-					...args: keyof NonNullable<
-						ReturnType<DictCallbacks[Key]>[typeof _args]
-					> extends never
-						? []
-						: [NonNullable<ReturnType<DictCallbacks[Key]>[typeof _args]>]
-				) => {
-					let locale =
-						dictCallbacks[key]?.().translation[languageTag] ||
-						'unable_to_load_translations'
-					for (const objKey in args[0]) {
-						locale = locale.replace(
-							new RegExp(`\\{\\{\\s*${objKey}\\s*\\}\\}`, 'g'),
-							() => String(args[0]?.[objKey]),
-						)
+			const { s, snapshot, subscribe } = useMemo(() => {
+				const s = uniqueKey ?? Symbol()
+				refcount.set(s, (refcount.get(s) || 0) + 1)
+				const existingSnapshot = snapshots.get(s)
+
+				const subscribe = (listener: () => void) => {
+					listeners.add(listener)
+					return () => {
+						const count = (refcount.get(s) || 1) - 1
+						DEBUG: console.log('check count', index, refcount.get(s), count)
+						refcount.set(s, count)
+						DEBUG: console.log(snapshots.get(s))
+						if (count < 1) {
+							DEBUG: console.log('delete', index)
+							snapshots.delete(s)
+						}
+						listeners.delete(listener)
 					}
-					return locale as string
-				},
-			}
-			snapshots.set(s, snapshot)
-			return {
-				useTranslations: () =>
-					useSyncExternalStore(
-						subscribe,
-						() => snapshots.get(s) as typeof snapshot,
-						() => snapshot,
-					),
-			}
+				}
+				if (existingSnapshot)
+					return { s, snapshot: existingSnapshot as typeof snapshot, subscribe }
+
+				const snapshot = {
+					language: languageTag,
+					setLanguage,
+					t: <Key extends keyof DictCallbacks>(
+						key: Key,
+						...args: keyof NonNullable<
+							ReturnType<DictCallbacks[Key]>[typeof _args]
+						> extends never
+							? []
+							: [NonNullable<ReturnType<DictCallbacks[Key]>[typeof _args]>]
+					) => {
+						let locale =
+							dictCallbacks[key]?.().translation[languageTag] ||
+							'unable_to_load_translations'
+						for (const objKey in args[0]) {
+							locale = locale.replace(
+								new RegExp(`\\{\\{\\s*${objKey}\\s*\\}\\}`, 'g'),
+								() => String(args[0]?.[objKey]),
+							)
+						}
+						return locale as string
+					},
+				}
+
+				snapshots.set(s, snapshot)
+				return { s, snapshot, subscribe }
+			}, [])
+
+			return useSyncExternalStore(
+				subscribe,
+				() => snapshots.get(s) as typeof snapshot,
+				() => snapshot,
+			)
 		},
 	}
 }

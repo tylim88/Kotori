@@ -1,8 +1,8 @@
-import { StrictMode, useState } from 'react'
+import { memo, StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { kotori } from '.'
 
-const { createTranslations, dict, setLanguage } = kotori({
+const { useTranslations, dict, setLanguage } = kotori({
 	primaryLanguageTag: 'en',
 	secondaryLanguageTags: ['zh', 'ja', 'ms'],
 })
@@ -21,16 +21,14 @@ const time = dict({
 	ms: 'waktu {{time}}',
 })<{ time: `${number}:${number}:${number}` }>
 
-const { useTranslations } = createTranslations({
-	intro,
-	time,
-})
-
 const Page1 = () => {
-	const { t, setLanguage, language } = useTranslations()
+	const { t, setLanguage, language } = useTranslations({
+		intro,
+		time,
+	})
 	return (
 		<>
-			<p>Page 2</p>
+			<p>Page 1</p>
 			<select
 				name="language"
 				value={language}
@@ -68,13 +66,16 @@ const lastLogin = dict({
 	ms: 'Log masuk terakhir: {{date}} pada {{time}}',
 })<{ date: `${number}-${number}-${number}`; time: `${number}:${number}` }>
 
-const { useTranslations: useTranslations2 } = createTranslations({
-	weather,
-	score,
-	lastLogin,
-})
-export const Page2 = () => {
-	const { t, setLanguage, language } = useTranslations2()
+export const Page2 = memo(({ index }: { index: number }) => {
+	const { t, setLanguage, language } = useTranslations(
+		{
+			weather,
+			score,
+			lastLogin,
+		},
+		'page2',
+		index,
+	)
 	return (
 		<>
 			<p>Page 2</p>
@@ -98,7 +99,7 @@ export const Page2 = () => {
 			<p>{t('lastLogin', { date: '2024-04-24', time: '09:30' })}</p>
 		</>
 	)
-}
+})
 const App = () => {
 	const [number, setNumber] = useState(2)
 	return (
@@ -112,7 +113,8 @@ const App = () => {
 					unmount page2
 				</button>
 			</div>
-			{number >= 0 && [...Array(number)].map((_, i) => <Page2 key={i} />)}
+			{number >= 0 &&
+				[...Array(number)].map((_, i) => <Page2 key={i} index={i} />)}
 		</>
 	)
 }

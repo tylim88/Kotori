@@ -7,4 +7,9 @@ export default defineConfig({
 	outDir: 'dist',
 	dts: true,
 	target: false,
+	inputOptions: {
+		transform: {
+			dropLabels: ['DEBUG'],
+		},
+	},
 })

@@ -5,7 +5,11 @@
 import { describe, expectTypeOf, it } from 'vitest'
 import { kotori } from '.'
 
-const { dict, createTranslations, setLanguage } = kotori({
+const {
+	dict,
+	useTranslations: createTranslation,
+	setLanguage,
+} = kotori({
 	primaryLanguageTag: 'en',
 	secondaryLanguageTags: ['zh', 'ja'],
 })
@@ -27,16 +31,16 @@ const typedVar = dict({
 	ja: '時間 {{time}}',
 })<{ time: `${number}:${number}` }>
 
-const { useTranslations } = createTranslations({
+const {
+	t,
+	language,
+	setLanguage: setLanguage_,
+} = createTranslation({
 	noVars,
 	oneVar,
 	twoVars,
 	typedVar,
 })
-
-declare const t: ReturnType<typeof useTranslations>['t']
-declare const language: ReturnType<typeof useTranslations>['language']
-declare const setLanguage_: ReturnType<typeof useTranslations>['setLanguage']
 
 // ============================
 // dict — variable mismatch
