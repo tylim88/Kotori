@@ -86,29 +86,11 @@ export const kotori = <
 		>(
 			dictCallbacks: DictCallbacks,
 			uniqueKey?: string,
-			index?: number,
 		) => {
 			const { s, snapshot, subscribe } = useMemo(() => {
 				const s = uniqueKey ?? Symbol()
-				refcount.set(s, (refcount.get(s) || 0) + 1)
-				const existingSnapshot = snapshots.get(s)
 
-				const subscribe = (listener: () => void) => {
-					listeners.add(listener)
-					return () => {
-						const count = (refcount.get(s) || 1) - 1
-						DEBUG: console.log('check count', index, refcount.get(s), count)
-						refcount.set(s, count)
-						DEBUG: console.log(snapshots.get(s))
-						if (count < 1) {
-							DEBUG: console.log('delete', index)
-							snapshots.delete(s)
-						}
-						listeners.delete(listener)
-					}
-				}
-				if (existingSnapshot)
-					return { s, snapshot: existingSnapshot as typeof snapshot, subscribe }
+				const existingSnapshot = snapshots.get(s)
 
 				const snapshot = {
 					language: languageTag,
@@ -133,6 +115,28 @@ export const kotori = <
 						return locale as string
 					},
 				}
+				const subscribe = (listener: () => void) => {
+					listeners.add(listener)
+					const prevCount = refcount.get(s) || 0
+					refcount.set(s, Math.max(0, prevCount) + 1)
+					if (!snapshots.get(s)) {
+						snapshots.set(s, snapshot)
+					}
+					return () => {
+						const count = (refcount.get(s) ?? 1) - 1
+						refcount.set(s, count)
+						if (count < 1) {
+							snapshots.delete(s)
+						}
+						listeners.delete(listener)
+					}
+				}
+				if (existingSnapshot)
+					return {
+						s,
+						snapshot: existingSnapshot as typeof snapshot,
+						subscribe,
+					}
 
 				snapshots.set(s, snapshot)
 				return { s, snapshot, subscribe }

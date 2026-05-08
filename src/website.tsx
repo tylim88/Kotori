@@ -74,7 +74,6 @@ export const Page2 = memo(({ index }: { index: number }) => {
 			lastLogin,
 		},
 		'page2',
-		index,
 	)
 	return (
 		<>
@@ -113,8 +112,9 @@ const App = () => {
 					unmount page2
 				</button>
 			</div>
-			{number >= 0 &&
-				[...Array(number)].map((_, i) => <Page2 key={i} index={i} />)}
+			{[...Array(number)].map((_, i) => (
+				<Page2 key={i} index={i} />
+			))}
 		</>
 	)
 }
