@@ -31,11 +31,7 @@ const typedVar = dict({
 	ja: '時間 {{time}}',
 })<{ time: `${number}:${number}` }>
 
-const {
-	t,
-	language,
-	setLanguage: setLanguage_,
-} = createTranslation({
+const { t, language } = createTranslation({
 	noVars,
 	oneVar,
 	twoVars,
@@ -160,24 +156,5 @@ describe('setLanguage', () => {
 		setLanguage('ms')
 		// @ts-expect-error invalid tag
 		setLanguage('klingon')
-	})
-})
-
-// ============================
-// setLanguage_
-// ============================
-
-describe('setLanguage_', () => {
-	it('accepts declared tags', () => {
-		setLanguage_('en')
-		setLanguage_('zh')
-		setLanguage_('ja')
-	})
-
-	it('rejects undeclared tags', () => {
-		// @ts-expect-error ms not declared
-		setLanguage_('ms')
-		// @ts-expect-error invalid tag
-		setLanguage_('klingon')
 	})
 })
