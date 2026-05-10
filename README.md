@@ -162,39 +162,9 @@ export const Page2 = () => {
 }
 ```
 
-## How It Works
-
-
-
-### One `kotori` instance per app
-
-`kotori` holds the language state. All `createT` calls share that state — changing the language anywhere rerenders everywhere.
-
-### One `createT` per page/component/feature
-
-Translations are colocated with the component that uses them. Bundlers naturally code-split them, so each page only loads what it needs.
-
-### Variables are inferred from string literals
-
-kotori parses `{{variable}}` at the type level. No separate type definitions needed — the string *is* the schema.
-
-```ts
-// primary string drives the contract
-const greeting = dict({ en: 'Hi {{name}}', zh: '你好 {{name}}' })
-//                                ^^^^^^ — inferred as required arg
-
-// secondary strings are validated against it
-const mismatch = dict({ en: 'Hi {{name}}', zh: '你好 {{other}}' })
-//                                                     ^^^^^^^ — compile error
-```
-
-### Custom argument types
-
-
-
 ## API
 
-![how kotori works](image.webp) 
+![API](image.webp) 
 
 ### `kotori(options)`
 
