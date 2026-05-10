@@ -54,7 +54,7 @@ npm i kotori
 ```ts
 import { kotori } from './kotori'
 
-export const { createTranslations, dict, setLanguage } = kotori({
+export const { useTranslations, dict, setLanguage } = kotori({
     primaryLanguageTag: 'en',
     secondaryLanguageTags: ['zh', 'ja', 'ms'],
 })
@@ -63,7 +63,7 @@ export const { createTranslations, dict, setLanguage } = kotori({
 **page1.tsx**
 
 ```tsx
-import { createTranslations, dict } from './utils'
+import { useTranslations, dict } from './utils'
 
 const intro = dict({
     en: 'my name is {{name}}, I am {{age}} years old.',
@@ -80,13 +80,12 @@ const time = dict({
 // optional: type your arguments, by default it's `Record<'time', string | number>` in this example
 })<{ time: `${number}:${number}:${number}` }> 
 
-const { useTranslations } = createTranslations({
+
+export const Page1 = () => {
+    const { t, language, setLanguage } = useTranslations({
     intro,
     time,
 })
-
-export const Page1 = () => {
-    const { t, language, setLanguage } = useTranslations()
     return (
         <>
             <select
@@ -109,7 +108,7 @@ export const Page1 = () => {
 **page2.tsx**
 
 ```tsx
-import { createTranslations, dict } from './utils'
+import { useTranslations, dict } from './utils'
 
 const weather = dict({
     en: 'The weather in {{city}} has {{humidity}}% humidity.',
@@ -132,14 +131,12 @@ const lastLogin = dict({
     ms: 'Log masuk terakhir: {{date}} pada {{time}}',
 })<{ date: `${number}-${number}-${number}`; time: `${number}:${number}` }>
 
-const { useTranslations } = createTranslations({
+export const Page2 = () => {
+    const { t, language, setLanguage } = useTranslations({
     weather,
     score,
     lastLogin,
 })
-
-export const Page2 = () => {
-    const { t, language, setLanguage } = useTranslations()
     return (
         <>
             <select
@@ -166,11 +163,7 @@ export const Page2 = () => {
 
 ### One `kotori` instance per app
 
-`kotori` holds the language state. All `createTranslations` calls share that state — changing the language anywhere rerenders everywhere.
-
-### One `createTranslations` per page/component/feature
-
-Translations are colocated with the component that uses them. Bundlers naturally code-split them, so each page only loads what it needs.
+`kotori` holds the language state. Changing the language anywhere rerenders everywhere.
 
 ### Variables are inferred from string literals
 
@@ -208,23 +201,19 @@ Creates a scoped i18n instance.
 | `primaryLanguageTag` | `AllTags` | The source language. Drives variable inference. |
 | `secondaryLanguageTags` | `AllTags[]` | Additional supported languages. |
 
-Returns `{ dict, createTranslations, setLanguage }`.
+Returns `{ dict, useTranslations, setLanguage }`.
 
 ### `dict(translations)<argsType?>`
 
 Defines a translation unit. Takes one string per language. Optionally takes a generic to narrow the interpolated variable types.
 
-### `createTranslations(dicts)`
-
-Registers a set of dicts and returns `{ useTranslations }`. Call once per page or feature module.
-
 ### `setLanguage(tag)`
 
 Updates the current language and rerenders all active `useTranslations` consumers across all pages. Available directly on the `kotori` instance — useful for calling outside of React (route guards, axios interceptors, etc.).
 
-### `useTranslations()`
+### `useTranslations(dicts)`
 
-React hook. Returns `{ t, language, setLanguage }`.
+Registers a set of dicts and returns `{ t, language, setLanguage }`.
 
 | return | type | description |
 | --- | --- | --- |
