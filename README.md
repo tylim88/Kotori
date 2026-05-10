@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.webp" alt="kotori i18n logo">
+</p>
+
 # Kotori
 
 Strongly-typed, modular i18n for React. Variables are inferred directly from your strings — no codegen, no JSON, no schema files.
