@@ -1,4 +1,6 @@
-# Kotori
+<p align="center">
+  <img src="logo.webp" alt="kotori i18n logo">
+</p>
 
 Strongly-typed, modular i18n for React. Variables are inferred directly from your strings — no codegen, no JSON, no schema files.
 
@@ -54,7 +56,7 @@ npm i kotori
 ```ts
 import { kotori } from './kotori'
 
-export const { createTranslations, dict, setLanguage } = kotori({
+export const { createT, dict, setLanguage } = kotori({
     primaryLanguageTag: 'en',
     secondaryLanguageTags: ['zh', 'ja', 'ms'],
 })
@@ -63,7 +65,7 @@ export const { createTranslations, dict, setLanguage } = kotori({
 **page1.tsx**
 
 ```tsx
-import { createTranslations, dict } from './utils'
+import { createT, dict } from './utils'
 
 const intro = dict({
     en: 'my name is {{name}}, I am {{age}} years old.',
@@ -80,13 +82,13 @@ const time = dict({
 // optional: type your arguments, by default it's `Record<'time', string | number>` in this example
 })<{ time: `${number}:${number}:${number}` }> 
 
-const { useTranslations } = createTranslations({
+const { useT } = createT({
     intro,
     time,
 })
 
 export const Page1 = () => {
-    const { t, language, setLanguage } = useTranslations()
+    const { t, language, setLanguage } = useT()
     return (
         <>
             <select
@@ -109,7 +111,7 @@ export const Page1 = () => {
 **page2.tsx**
 
 ```tsx
-import { createTranslations, dict } from './utils'
+import { createT, dict } from './utils'
 
 const weather = dict({
     en: 'The weather in {{city}} has {{humidity}}% humidity.',
@@ -132,14 +134,14 @@ const lastLogin = dict({
     ms: 'Log masuk terakhir: {{date}} pada {{time}}',
 })<{ date: `${number}-${number}-${number}`; time: `${number}:${number}` }>
 
-const { useTranslations } = createTranslations({
+const { useT } = createT({
     weather,
     score,
     lastLogin,
 })
 
 export const Page2 = () => {
-    const { t, language, setLanguage } = useTranslations()
+    const { t, language, setLanguage } = useT()
     return (
         <>
             <select
@@ -162,13 +164,13 @@ export const Page2 = () => {
 
 ## How It Works
 
-![how kotori works](image.webp) 
+
 
 ### One `kotori` instance per app
 
-`kotori` holds the language state. All `createTranslations` calls share that state — changing the language anywhere rerenders everywhere.
+`kotori` holds the language state. All `createT` calls share that state — changing the language anywhere rerenders everywhere.
 
-### One `createTranslations` per page/component/feature
+### One `createT` per page/component/feature
 
 Translations are colocated with the component that uses them. Bundlers naturally code-split them, so each page only loads what it needs.
 
@@ -188,16 +190,11 @@ const mismatch = dict({ en: 'Hi {{name}}', zh: '你好 {{other}}' })
 
 ### Custom argument types
 
-By default, variables are typed as `string | number`. Pass a generic to narrow them:
 
-```ts
-const time = dict({ en: '{{hour}}:{{minute}}' })<{
-    hour: number
-    minute: number
-}>
-```
 
 ## API
+
+![how kotori works](image.webp) 
 
 ### `kotori(options)`
 
@@ -208,29 +205,42 @@ Creates a scoped i18n instance.
 | `primaryLanguageTag` | `AllTags` | The source language. Drives variable inference. |
 | `secondaryLanguageTags` | `AllTags[]` | Additional supported languages. |
 
-Returns `{ dict, createTranslations, setLanguage }`.
+Returns `{ dict, createT, setLanguage }`.
 
 ### `dict(translations)<argsType?>`
 
-Defines a translation unit. Takes one string per language. Optionally takes a generic to narrow the interpolated variable types.
+Defines a translation unit. Takes one string per language
 
-### `createTranslations(dicts)`
+```ts
+const time = dict({ en: '{{hour}}:{{minute}}' })
+```
 
-Registers a set of dicts and returns `{ useTranslations }`. Call once per page or feature module.
+By default, variables are typed as `string | number`. Pass a generic to narrow them:
+
+```ts
+const time = dict({ en: '{{hour}}:{{minute}}' })<{
+    hour: number
+    minute: number
+}>
+```
+
+### `createT(dicts)`
+
+Registers a set of dicts and returns `{ useT }`. Call once per page or feature module.
 
 ### `setLanguage(tag)`
 
-Updates the current language and rerenders all active `useTranslations` consumers across all pages. Available directly on the `kotori` instance — useful for calling outside of React (route guards, axios interceptors, etc.).
+Updates the current language and rerenders all active `useT` consumers across all pages. Available directly on the `kotori` instance — useful for calling outside of React (route guards, axios interceptors, etc.).
 
-### `useTranslations()`
+### `useT()`
 
 React hook. Returns `{ t, language, setLanguage }`.
 
 | return | type | description |
 | --- | --- | --- |
 | `t(key, args?)` | `string` | Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't. |
-| `language` | `WorkingTags` | The current language tag as a reactive value. Updates when `setLanguage` is called. |
-| `setLanguage(tag)` | `void` | Updates the language and rerenders all active `useTranslations` consumers. |
+| `language` | `primaryLanguageTag` \| `secondaryLanguageTags` | The current language tag as a reactive value. Updates when `setLanguage` is called. |
+| `setLanguage(tag)` | `void` | Updates the language and rerenders all active `useT` consumers. |
 
 ## Language Tags
 

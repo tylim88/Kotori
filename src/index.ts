@@ -79,7 +79,7 @@ export const kotori = <
 					translation: typeof translation
 					[_args]?: ArgsType
 				}>,
-		createTranslations: <
+		createT: <
 			const DictCallbacks extends Record<
 				string,
 				() => Readonly<{
@@ -116,7 +116,7 @@ export const kotori = <
 			}
 			snapshots.set(s, snapshot)
 			return {
-				useTranslations: () =>
+				useT: () =>
 					useSyncExternalStore(
 						subscribe,
 						() => snapshots.get(s) as typeof snapshot,

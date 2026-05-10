@@ -2,7 +2,7 @@ import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { kotori } from '.'
 
-const { createTranslations, dict, setLanguage } = kotori({
+const { createT, dict, setLanguage } = kotori({
 	primaryLanguageTag: 'en',
 	secondaryLanguageTags: ['zh', 'ja', 'ms'],
 })
@@ -21,13 +21,13 @@ const time = dict({
 	ms: 'waktu {{time}}',
 })<{ time: `${number}:${number}:${number}` }>
 
-const { useTranslations } = createTranslations({
+const { useT } = createT({
 	intro,
 	time,
 })
 
 const Page1 = () => {
-	const { t, setLanguage, language } = useTranslations()
+	const { t, setLanguage, language } = useT()
 	return (
 		<>
 			<p>Page 2</p>
@@ -68,7 +68,7 @@ const lastLogin = dict({
 	ms: 'Log masuk terakhir: {{date}} pada {{time}}',
 })<{ date: `${number}-${number}-${number}`; time: `${number}:${number}` }>
 
-const { useTranslations: useTranslations2 } = createTranslations({
+const { useT: useTranslations2 } = createT({
 	weather,
 	score,
 	lastLogin,
