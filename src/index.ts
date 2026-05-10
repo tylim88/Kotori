@@ -29,11 +29,11 @@ export const kotori = <
 }) => {
 	const listeners = new Set<() => void>()
 	type WorkingTags = PrimaryTag | SecondaryTags
-	let languageTag: WorkingTags = props.primaryLanguageTag
+	let language = props.primaryLanguageTag as WorkingTags
 
 	const snapshots = new Map<symbol, object>()
 	const setLanguage = (tag: WorkingTags) => {
-		languageTag = tag
+		language = tag
 		snapshots.forEach((snapshot, key) => {
 			snapshots.set(key, { ...snapshot, language: tag })
 		})
@@ -46,6 +46,33 @@ export const kotori = <
 		return () => {
 			listeners.delete(listener)
 		}
+	}
+
+	const snapshot = {
+		language,
+		setLanguage,
+		t: <
+			DictCallback extends () => Readonly<{
+				translation: Record<WorkingTags, string>
+				[_args]?: Record<string, string | number>
+			}>,
+		>(
+			dict: DictCallback,
+			...args: keyof NonNullable<
+				ReturnType<DictCallback>[typeof _args]
+			> extends never
+				? []
+				: [NonNullable<ReturnType<DictCallback>[typeof _args]>]
+		) => {
+			let locale = dict().translation[language] || 'unable_to_load_translations'
+			for (const objKey in args[0]) {
+				locale = locale.replace(
+					new RegExp(`\\{\\{\\s*${objKey}\\s*\\}\\}`, 'g'),
+					() => String(args[0]?.[objKey]),
+				)
+			}
+			return locale as string
+		},
 	}
 
 	return {
@@ -79,50 +106,12 @@ export const kotori = <
 					translation: typeof translation
 					[_args]?: ArgsType
 				}>,
-		createTranslations: <
-			const DictCallbacks extends Record<
-				string,
-				() => Readonly<{
-					translation: Record<WorkingTags, string>
-					[_args]?: Record<string, string | number>
-				}>
-			>,
-		>(
-			dictCallbacks: DictCallbacks,
-		) => {
-			const s = Symbol()
-			const snapshot = {
-				language: languageTag,
-				setLanguage,
-				t: <Key extends keyof DictCallbacks>(
-					key: Key,
-					...args: keyof NonNullable<
-						ReturnType<DictCallbacks[Key]>[typeof _args]
-					> extends never
-						? []
-						: [NonNullable<ReturnType<DictCallbacks[Key]>[typeof _args]>]
-				) => {
-					let locale =
-						dictCallbacks[key]?.().translation[languageTag] ||
-						'unable_to_load_translations'
-					for (const objKey in args[0]) {
-						locale = locale.replace(
-							new RegExp(`\\{\\{\\s*${objKey}\\s*\\}\\}`, 'g'),
-							() => String(args[0]?.[objKey]),
-						)
-					}
-					return locale as string
-				},
-			}
-			snapshots.set(s, snapshot)
-			return {
-				useTranslations: () =>
-					useSyncExternalStore(
-						subscribe,
-						() => snapshots.get(s) as typeof snapshot,
-						() => snapshot,
-					),
-			}
-		},
+
+		useT: () =>
+			useSyncExternalStore(
+				subscribe,
+				() => snapshot,
+				() => snapshot,
+			),
 	}
 }

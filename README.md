@@ -12,19 +12,26 @@ const { dict } = kotori({
 const intro = dict({ 
     // ⭐ base string drives the type contract
     en: 'Hello {{name}}, is it {{time}} now?', 
+
      // ❌ TypeScript error: missing key 'name' 
     zh: '你好，现在是 {{time}} 吗？',
+
     // ❌ TypeScript error: unknown key 'nam'      
     ms: 'Hai {{nam}}, adakah pukul {{time}} sekarang?'  
+
 // optional: type your arguments, by default it's `Record<'name'|'time', string | number>` in this example
 })<{name: string; time: `${number}:${number}`}> 
 
+
 // ✅ Works
 t('intro', { name: 'John', time: '12:25' }) 
+
 // ❌ TypeScript error: missing { name }
 t('intro', { time: '12:25' })
+
 // ❌ TypeScript error: unknown key 'nama'                   
 t('intro', { nama: 'John', time: '12:25' }) 
+
 // ❌ TypeScript error: invalid format for 'time'
 t('intro', { name: 'John', time: '12-00' }) 
 ```
@@ -33,11 +40,11 @@ t('intro', { name: 'John', time: '12-00' })
 - No JSON
 - No dependencies
 - No build step
-- 0.38kb gzipped
+- 0.34kb gzipped
 - Modular and tree-shakeable
 - Language change in one page rerenders all pages
-- Translation keys are typed — no more string typos
-- Variables typed and inferred from string literals
+- Variables typed and inferred from string literals — no more string typos
+- maximum type safety with minimum types
 
 Demo: <https://stackblitz.com/edit/vitejs-vite-nyxwmhre?file=src%2FApp.tsx>
 
@@ -54,7 +61,7 @@ npm i kotori
 ```ts
 import { kotori } from './kotori'
 
-export const { createTranslations, dict, setLanguage } = kotori({
+export const { useT, dict, setLanguage } = kotori({
     primaryLanguageTag: 'en',
     secondaryLanguageTags: ['zh', 'ja', 'ms'],
 })
@@ -63,7 +70,7 @@ export const { createTranslations, dict, setLanguage } = kotori({
 **page1.tsx**
 
 ```tsx
-import { createTranslations, dict } from './utils'
+import { useT, dict } from './utils'
 
 const intro = dict({
     en: 'my name is {{name}}, I am {{age}} years old.',
@@ -80,13 +87,8 @@ const time = dict({
 // optional: type your arguments, by default it's `Record<'time', string | number>` in this example
 })<{ time: `${number}:${number}:${number}` }> 
 
-const { useTranslations } = createTranslations({
-    intro,
-    time,
-})
-
 export const Page1 = () => {
-    const { t, language, setLanguage } = useTranslations()
+    const { t, language, setLanguage } = useT()
     return (
         <>
             <select
@@ -109,7 +111,7 @@ export const Page1 = () => {
 **page2.tsx**
 
 ```tsx
-import { createTranslations, dict } from './utils'
+import { useT, dict } from './utils'
 
 const weather = dict({
     en: 'The weather in {{city}} has {{humidity}}% humidity.',
@@ -132,14 +134,8 @@ const lastLogin = dict({
     ms: 'Log masuk terakhir: {{date}} pada {{time}}',
 })<{ date: `${number}-${number}-${number}`; time: `${number}:${number}` }>
 
-const { useTranslations } = createTranslations({
-    weather,
-    score,
-    lastLogin,
-})
-
 export const Page2 = () => {
-    const { t, language, setLanguage } = useTranslations()
+    const { t, language, setLanguage } = useT()
     return (
         <>
             <select
@@ -152,52 +148,17 @@ export const Page2 = () => {
                 <option value="ja">Japanese</option>
                 <option value="ms">Malay</option>
             </select>
-            <p>{t('weather', { city: 'Kuala Lumpur', humidity: 80 })}</p>
-            <p>{t('score', { score: 87, total: 100 })}</p>
-            <p>{t('lastLogin', { date: '2024-04-24', time: '09:30' })}</p>
+            <p>{t(weather, { city: 'Kuala Lumpur', humidity: 80 })}</p>
+            <p>{t(score, { score: 87, total: 100 })}</p>
+            <p>{t(lastLogin, { date: '2024-04-24', time: '09:30' })}</p>
         </>
     )
 }
 ```
 
-## How It Works
+## API
 
 ![how kotori works](image.webp) 
-
-### One `kotori` instance per app
-
-`kotori` holds the language state. All `createTranslations` calls share that state — changing the language anywhere rerenders everywhere.
-
-### One `createTranslations` per page/component/feature
-
-Translations are colocated with the component that uses them. Bundlers naturally code-split them, so each page only loads what it needs.
-
-### Variables are inferred from string literals
-
-kotori parses `{{variable}}` at the type level. No separate type definitions needed — the string *is* the schema.
-
-```ts
-// primary string drives the contract
-const greeting = dict({ en: 'Hi {{name}}', zh: '你好 {{name}}' })
-//                                ^^^^^^ — inferred as required arg
-
-// secondary strings are validated against it
-const mismatch = dict({ en: 'Hi {{name}}', zh: '你好 {{other}}' })
-//                                                     ^^^^^^^ — compile error
-```
-
-### Custom argument types
-
-By default, variables are typed as `string | number`. Pass a generic to narrow them:
-
-```ts
-const time = dict({ en: '{{hour}}:{{minute}}' })<{
-    hour: number
-    minute: number
-}>
-```
-
-## API
 
 ### `kotori(options)`
 
@@ -208,36 +169,50 @@ Creates a scoped i18n instance.
 | `primaryLanguageTag` | `AllTags` | The source language. Drives variable inference. |
 | `secondaryLanguageTags` | `AllTags[]` | Additional supported languages. |
 
-Returns `{ dict, createTranslations, setLanguage }`.
+Returns `{ dict, useT, setLanguage }`.
 
 ### `dict(translations)<argsType?>`
 
 Defines a translation unit. Takes one string per language. Optionally takes a generic to narrow the interpolated variable types.
 
-### `createTranslations(dicts)`
+By default, variables are typed as `string | number`. Pass a generic to narrow them:
 
-Registers a set of dicts and returns `{ useTranslations }`. Call once per page or feature module.
+```ts
+const time = dict({ en: '{{hour}}:{{minute}}' })<{
+    hour: number
+    minute: number
+}>
+```
 
 ### `setLanguage(tag)`
 
-Updates the current language and rerenders all active `useTranslations` consumers across all pages. Available directly on the `kotori` instance — useful for calling outside of React (route guards, axios interceptors, etc.).
+Updates the current language and rerenders all active `useT` consumers across all pages. Available directly on the `kotori` instance — useful for calling outside of React (route guards, axios interceptors, etc.).
 
-### `useTranslations()`
+### `useT()`
 
 React hook. Returns `{ t, language, setLanguage }`.
 
 | return | type | description |
 | --- | --- | --- |
-| `t(key, args?)` | `string` | Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't. |
-| `language` | `WorkingTags` | The current language tag as a reactive value. Updates when `setLanguage` is called. |
-| `setLanguage(tag)` | `void` | Updates the language and rerenders all active `useTranslations` consumers. |
+| `t(dict, args?)` | `string` | Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't. |
+| `language` | `primaryLanguageTag` \| `secondaryLanguageTags` | The current language tag as a reactive value. Updates when `setLanguage` is called. |
+| `setLanguage(tag)` | `void` | Updates the language and rerenders all active `useT` consumers. |
 
 ## Language Tags
 
 kotori uses [BCP 47](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) language tags. Both subtags (`en`, `zh`) and full tags (`en-US`, `zh-Hans`) are accepted and validated at the type level.
+
+## Roadmap
+
+- Auto detect locale from browser settings
+- Auto persist language selection to localStorage
+- Pluralization support
+- Gender support
+- Value formatting (date, number, currency)
 
 ## Trivial
 
 There are already a lot of i18n libraries, and the good names are mostly taken. The original plan was *kotoba* (言葉), the Japanese word for "words" — also taken. Claude suggested *kotori* as an alternative, and it stuck.
 
 *Kotori* (小鳥) means "small bird" in Japanese. No deeper relevance to the library — it just sounds nice.
+

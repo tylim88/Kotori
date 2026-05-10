@@ -5,7 +5,7 @@
 import { describe, expectTypeOf, it } from 'vitest'
 import { kotori } from '.'
 
-const { dict, createTranslations, setLanguage } = kotori({
+const { dict, useT, setLanguage } = kotori({
 	primaryLanguageTag: 'en',
 	secondaryLanguageTags: ['zh', 'ja'],
 })
@@ -27,16 +27,9 @@ const typedVar = dict({
 	ja: '時間 {{time}}',
 })<{ time: `${number}:${number}` }>
 
-const { useTranslations } = createTranslations({
-	noVars,
-	oneVar,
-	twoVars,
-	typedVar,
-})
-
-declare const t: ReturnType<typeof useTranslations>['t']
-declare const language: ReturnType<typeof useTranslations>['language']
-declare const setLanguage_: ReturnType<typeof useTranslations>['setLanguage']
+declare const t: ReturnType<typeof useT>['t']
+declare const language: ReturnType<typeof useT>['language']
+declare const setLanguage_: ReturnType<typeof useT>['setLanguage']
 
 // ============================
 // dict — variable mismatch
@@ -83,27 +76,27 @@ describe('dict', () => {
 
 describe('t', () => {
 	it('returns string', () => {
-		expectTypeOf(t('noVars')).toEqualTypeOf<string>()
-		expectTypeOf(t('oneVar', { name: 'John' })).toEqualTypeOf<string>()
+		expectTypeOf(t(noVars)).toEqualTypeOf<string>()
+		expectTypeOf(t(oneVar, { name: 'John' })).toEqualTypeOf<string>()
 	})
 
 	it('omits args when no variables', () => {
-		t('noVars')
+		t(noVars)
 	})
 
 	it('requires args when variables exist', () => {
 		// @ts-expect-error missing args
-		t('oneVar')
+		t(oneVar)
 	})
 
 	it('rejects args when no variables', () => {
 		// @ts-expect-error no args expected
-		t('noVars', { name: 'John' })
+		t(noVars, { name: 'John' })
 	})
 
 	it('accepts correct args', () => {
-		t('oneVar', { name: 'John' })
-		t('twoVars', { x: 'a', y: 1 })
+		t(oneVar, { name: 'John' })
+		t(twoVars, { x: 'a', y: 1 })
 	})
 
 	it('rejects missing key in args', () => {
@@ -115,18 +108,18 @@ describe('t', () => {
 
 	it('rejects extra key in args', () => {
 		// @ts-expect-error extra key
-		t('oneVar', { name: 'John', extra: 'x' })
+		t(oneVar, { name: 'John', extra: 'x' })
 	})
 
 	it('enforces custom arg types', () => {
-		t('typedVar', { time: '12:00' })
+		t(typedVar, { time: '12:00' })
 	})
 
 	it('rejects wrong format for custom arg types', () => {
 		// @ts-expect-error wrong format
-		t('typedVar', { time: '12-00' })
+		t(typedVar, { time: '12-00' })
 		// @ts-expect-error number not assignable to template literal
-		t('typedVar', { time: 123 })
+		t(typedVar, { time: 123 })
 	})
 })
 

@@ -2,7 +2,7 @@ import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { kotori } from '.'
 
-const { createTranslations, dict, setLanguage } = kotori({
+const { useT, dict, setLanguage } = kotori({
 	primaryLanguageTag: 'en',
 	secondaryLanguageTags: ['zh', 'ja', 'ms'],
 })
@@ -21,13 +21,8 @@ const time = dict({
 	ms: 'waktu {{time}}',
 })<{ time: `${number}:${number}:${number}` }>
 
-const { useTranslations } = createTranslations({
-	intro,
-	time,
-})
-
 const Page1 = () => {
-	const { t, setLanguage, language } = useTranslations()
+	const { t, setLanguage, language } = useT()
 	return (
 		<>
 			<p>Page 2</p>
@@ -41,8 +36,8 @@ const Page1 = () => {
 				<option value="ja">Japanese</option>
 				<option value="ms">Malay</option>
 			</select>
-			<p>{t('intro', { name: 'John', age: 30 })}</p>
-			<p>{t('time', { time: '12:00:00' })}</p>
+			<p>{t(intro, { name: 'John', age: 30 })}</p>
+			<p>{t(time, { time: '12:00:00' })}</p>
 		</>
 	)
 }
@@ -68,13 +63,8 @@ const lastLogin = dict({
 	ms: 'Log masuk terakhir: {{date}} pada {{time}}',
 })<{ date: `${number}-${number}-${number}`; time: `${number}:${number}` }>
 
-const { useTranslations: useTranslations2 } = createTranslations({
-	weather,
-	score,
-	lastLogin,
-})
 export const Page2 = () => {
-	const { t, setLanguage, language } = useTranslations2()
+	const { t, setLanguage, language } = useT()
 	return (
 		<>
 			<p>Page 2</p>
@@ -89,13 +79,13 @@ export const Page2 = () => {
 				<option value="ms">Malay</option>
 			</select>
 			<p>
-				{t('weather', {
+				{t(weather, {
 					city: 'Kuala Lumpur',
 					humidity: 80,
 				})}
 			</p>
-			<p>{t('score', { score: 87, total: 100 })}</p>
-			<p>{t('lastLogin', { date: '2024-04-24', time: '09:30' })}</p>
+			<p>{t(score, { score: 87, total: 100 })}</p>
+			<p>{t(lastLogin, { date: '2024-04-24', time: '09:30' })}</p>
 		</>
 	)
 }
