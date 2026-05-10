@@ -42,7 +42,7 @@ t('intro', { name: 'John', time: '12-00' })
 - No JSON
 - No dependencies
 - No build step
-- 0.34kb gzipped
+- 0.33kb gzipped
 - Modular and tree-shakeable
 - Language change in one page rerenders all pages
 - Variables typed and inferred from string literals — no more string typos

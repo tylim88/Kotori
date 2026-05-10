@@ -31,12 +31,9 @@ export const kotori = <
 	type WorkingTags = PrimaryTag | SecondaryTags
 	let language = props.primaryLanguageTag as WorkingTags
 
-	const snapshots = new Map<symbol, object>()
 	const setLanguage = (tag: WorkingTags) => {
 		language = tag
-		snapshots.forEach((snapshot, key) => {
-			snapshots.set(key, { ...snapshot, language: tag })
-		})
+		snapshot = { ...snapshot, language }
 		listeners.forEach((listener) => {
 			listener()
 		})
@@ -48,7 +45,7 @@ export const kotori = <
 		}
 	}
 
-	const snapshot = {
+	let snapshot = {
 		language,
 		setLanguage,
 		t: <
