@@ -29,7 +29,6 @@ const typedVar = dict({
 
 declare const t: ReturnType<typeof useT>['t']
 declare const language: ReturnType<typeof useT>['language']
-declare const setLanguage_: ReturnType<typeof useT>['setLanguage']
 
 // ============================
 // dict — variable mismatch
@@ -149,24 +148,5 @@ describe('setLanguage', () => {
 		setLanguage('ms')
 		// @ts-expect-error invalid tag
 		setLanguage('klingon')
-	})
-})
-
-// ============================
-// setLanguage_
-// ============================
-
-describe('setLanguage_', () => {
-	it('accepts declared tags', () => {
-		setLanguage_('en')
-		setLanguage_('zh')
-		setLanguage_('ja')
-	})
-
-	it('rejects undeclared tags', () => {
-		// @ts-expect-error ms not declared
-		setLanguage_('ms')
-		// @ts-expect-error invalid tag
-		setLanguage_('klingon')
 	})
 })
