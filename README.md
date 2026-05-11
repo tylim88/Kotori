@@ -162,7 +162,7 @@ export const Page2 = () => {
 
 ![how kotori works](image.webp) 
 
-### `kotori(options)`
+### `kotori({ primaryLanguageTag: BCP47LanguageTag, secondaryLanguageTags: BCP47LanguageTag[] })`
 
 Creates a scoped i18n instance.
 
@@ -182,7 +182,7 @@ export const { useT, dict, setLanguage } = kotori({
 
 Returns `{ dict, useT, setLanguage }`.
 
-### `dict(translations)<argsType?>`
+### `dict(Record<primaryLanguageTag | secondaryLanguageTags, string>)<argsType?>`
 
 Defines a translation unit. Takes one string per language.
 
@@ -211,7 +211,7 @@ React hook. Returns `{ t, language, setLanguage }`.
 | --- | --- | --- |
 | `t(dict, args?)` | `string` | Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't. |
 | `language` | `primaryLanguageTag` \| `secondaryLanguageTags` | The current language tag as a reactive value. Updates when `setLanguage` is called. |
-| `setLanguage(tag)` | `void` | Updates the language and rerenders all active `useT` consumers. |
+| `setLanguage(primaryLanguageTag \| secondaryLanguageTags)` | `void` | Updates the language and rerenders all active `useT` consumers. |
 
 ## Language Tags
 
