@@ -61,7 +61,7 @@ npm i kotori
 **utils.ts**
 
 ```ts
-import { kotori } from './kotori'
+import { kotori } from 'kotori'
 
 export const { useT, dict, setLanguage } = kotori({
     primaryLanguageTag: 'en',
@@ -166,16 +166,29 @@ export const Page2 = () => {
 
 Creates a scoped i18n instance.
 
+```ts
+import { kotori } from 'kotori'
+
+export const { useT, dict, setLanguage } = kotori({
+    primaryLanguageTag: 'en',
+    secondaryLanguageTags: ['zh', 'ja', 'ms'],
+})
+```
+
 | option | type | description |
 | --- | --- | --- |
-| `primaryLanguageTag` | `AllTags` | The source language. Drives variable inference. |
-| `secondaryLanguageTags` | `AllTags[]` | Additional supported languages. |
+| `primaryLanguageTag` | `BCP47LanguageTag` | The source language. Drives variable inference. |
+| `secondaryLanguageTags` | `BCP47LanguageTag[]` | Additional supported languages. |
 
 Returns `{ dict, useT, setLanguage }`.
 
 ### `dict(translations)<argsType?>`
 
-Defines a translation unit. Takes one string per language. Optionally takes a generic to narrow the interpolated variable types.
+Defines a translation unit. Takes one string per language.
+
+```ts
+const time = dict({ en: '{{hour}}:{{minute}}' })
+```
 
 By default, variables are typed as `string | number`. Pass a generic to narrow them:
 
