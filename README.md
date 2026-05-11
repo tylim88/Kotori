@@ -162,7 +162,7 @@ export const Page2 = () => {
 
 ![how kotori works](image.webp) 
 
-### `kotori({ primaryLanguageTag: BCP47LanguageTag, secondaryLanguageTags: BCP47LanguageTag[] })`
+### `kotori(options)`
 
 Creates a scoped i18n instance.
 
@@ -182,7 +182,7 @@ export const { useT, dict, setLanguage } = kotori({
 
 Returns `{ dict, useT, setLanguage }`.
 
-### `dict(Record<primaryLanguageTag | secondaryLanguageTags, string>)<argsType?>`
+### `dict(translations)<argsType?>`
 
 Defines a translation unit. Takes one string per language.
 
