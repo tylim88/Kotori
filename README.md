@@ -26,16 +26,16 @@ const intro = dict({
 
 
 // ✅ Works
-t('intro', { name: 'John', time: '12:25' }) 
+t(intro, { name: 'John', time: '12:25' }) 
 
 // ❌ TypeScript error: missing { name }
-t('intro', { time: '12:25' })
+t(intro, { time: '12:25' })
 
 // ❌ TypeScript error: unknown key 'nama'                   
-t('intro', { nama: 'John', time: '12:25' }) 
+t(intro, { nama: 'John', time: '12:25' }) 
 
 // ❌ TypeScript error: invalid format for 'time'
-t('intro', { name: 'John', time: '12-00' }) 
+t(intro, { name: 'John', time: '12-00' }) 
 ```
 
 - No codegen
