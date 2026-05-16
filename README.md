@@ -69,14 +69,14 @@ export const { useT, dict, setLanguage, t } = kotori({
 })
 
 // you can define your dicts in the same file or separate them by component, it's up to you
-const intro = dict({
+export const intro = dict({
     en: 'my name is {{name}}, I am {{age}} years old.',
     zh: '我叫{{name}}，我今年{{age}}岁了。',
     ja: '私の名前は{{name}}で、{{age}}歳です。',
     ms: 'nama saya {{name}}, saya berumur {{age}} tahun.',
 })
 
-const time = dict({
+export const time = dict({
     en: 'time {{time}}',
     zh: '时间 {{time}}',
     ja: '時間 {{time}}',
