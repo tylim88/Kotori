@@ -58,7 +58,7 @@ npm i kotori
 
 ## Quick Start
 
-**utils.ts**
+**locales.ts**
 
 ```ts
 import { kotori } from 'kotori'
@@ -67,12 +67,6 @@ export const { useT, dict, setLanguage, t } = kotori({
     primaryLanguageTag: 'en',
     secondaryLanguageTags: ['zh', 'ja', 'ms'],
 })
-```
-
-**page1.tsx**
-
-```tsx
-import { useT, dict, setLanguage, t } from './utils'
 
 const intro = dict({
     en: 'my name is {{name}}, I am {{age}} years old.',
@@ -88,32 +82,6 @@ const time = dict({
     ms: 'waktu {{time}}',
 // optional: type your arguments, by default it's `Record<'time', string | number>` in this example
 })<{ time: `${number}:${number}:${number}` }> 
-
-export const Page1 = () => {
-    const { language } = useT()
-    return (
-        <>
-            <select
-                name="language"
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as 'en')}
-            >
-                <option value="en">English</option>
-                <option value="zh">Chinese</option>
-                <option value="ja">Japanese</option>
-                <option value="ms">Malay</option>
-            </select>
-            <p>{t('intro', { name: 'John', age: 30 })}</p>
-            <p>{t('time', { time: '12:00:00' })}</p>
-        </>
-    )
-}
-```
-
-**page2.tsx**
-
-```tsx
-import { useT, dict } from './utils'
 
 const weather = dict({
     en: 'The weather in {{city}} has {{humidity}}% humidity.',
@@ -135,9 +103,17 @@ const lastLogin = dict({
     ja: '最終ログイン：{{date}} {{time}}',
     ms: 'Log masuk terakhir: {{date}} pada {{time}}',
 })<{ date: `${number}-${number}-${number}`; time: `${number}:${number}` }>
+```
 
-export const Page2 = () => {
-    const { t, language, setLanguage } = useT()
+**page1.tsx**
+
+```tsx
+import { useT, dict, setLanguage, t, intro, time } from './locales'
+
+export const Page1 = () => {
+
+    const { language } = useT()
+
     return (
         <>
             <select
@@ -150,6 +126,24 @@ export const Page2 = () => {
                 <option value="ja">Japanese</option>
                 <option value="ms">Malay</option>
             </select>
+            <p>{t(intro, { name: 'John', age: 30 })}</p>
+            <p>{t(time, { time: '12:00:00' })}</p>
+        </>
+    )
+}
+```
+
+**page2.tsx**
+
+```tsx
+import { useT, dict, setLanguage, t, weather, score, lastLogin } from './locales'
+
+export const Page2 = () => {
+
+    useT()
+
+    return (
+        <>
             <p>{t(weather, { city: 'Kuala Lumpur', humidity: 80 })}</p>
             <p>{t(score, { score: 87, total: 100 })}</p>
             <p>{t(lastLogin, { date: '2024-04-24', time: '09:30' })}</p>
@@ -205,7 +199,7 @@ Updates the current language and rerenders all active `useT` consumers across al
 
 ### `t(dict, args?)` 
 
-Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't. Available directly on the `kotori` instance for non-React usage, but typically accessed via the `useT` hook.
+Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't. Available directly on the `kotori` instance for non-React usage.
 
 ### `useT()`
 
@@ -213,9 +207,7 @@ React hook. Returns `{ t, language, setLanguage }`.
 
 | return | type | description |
 | --- | --- | --- |
-| `t(dict, args?)` | `string` | Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't. |
 | `language` | `primaryLanguageTag` \| `secondaryLanguageTags` | The current language tag as a reactive value. Updates when `setLanguage` is called. |
-| `setLanguage(primaryLanguageTag \| secondaryLanguageTags)` | `void` | Updates the language and rerenders all active `useT` consumers. |
 
 ## Language Tags
 

@@ -5,7 +5,7 @@
 import { describe, expectTypeOf, it } from 'vitest'
 import { kotori } from '.'
 
-const { dict, useT, setLanguage } = kotori({
+const { dict, useT, setLanguage, t } = kotori({
 	primaryLanguageTag: 'en',
 	secondaryLanguageTags: ['zh', 'ja'],
 })
@@ -27,7 +27,6 @@ const typedVar = dict({
 	ja: '時間 {{time}}',
 })<{ time: `${number}:${number}` }>
 
-declare const t: ReturnType<typeof useT>['t']
 declare const language: ReturnType<typeof useT>['language']
 
 // ============================

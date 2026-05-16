@@ -68,8 +68,6 @@ export const kotori = <
 	}
 	let snapshot = {
 		language,
-		setLanguage,
-		t,
 	}
 
 	return {
