@@ -63,7 +63,7 @@ npm i kotori
 ```ts
 import { kotori } from 'kotori'
 
-export const { useT, dict, setLanguage } = kotori({
+export const { useT, dict, setLanguage, t } = kotori({
     primaryLanguageTag: 'en',
     secondaryLanguageTags: ['zh', 'ja', 'ms'],
 })
@@ -72,7 +72,7 @@ export const { useT, dict, setLanguage } = kotori({
 **page1.tsx**
 
 ```tsx
-import { useT, dict } from './utils'
+import { useT, dict, setLanguage, t } from './utils'
 
 const intro = dict({
     en: 'my name is {{name}}, I am {{age}} years old.',
@@ -90,7 +90,7 @@ const time = dict({
 })<{ time: `${number}:${number}:${number}` }> 
 
 export const Page1 = () => {
-    const { t, language, setLanguage } = useT()
+    const { language } = useT()
     return (
         <>
             <select
