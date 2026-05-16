@@ -203,7 +203,7 @@ Returns the translated string for the current language. `args` is required if th
 
 ### `useT()`
 
-React hook. Returns `{ t, language, setLanguage }`.
+React hook. Returns `{ language }`.
 
 | return | type | description |
 | --- | --- | --- |
