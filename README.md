@@ -42,7 +42,7 @@ t(intro, { name: 'John', time: '12-00' })
 - No JSON
 - No dependencies
 - No build step
-- 0.33kb gzipped
+- 0.31kb minified and gzipped
 - Modular and tree-shakeable
 - Language change in one page rerenders all pages
 - Variables typed and inferred from string literals — no more string typos
@@ -58,7 +58,7 @@ npm i kotori
 
 ## Quick Start
 
-**locales.ts**
+### locales.ts
 
 ```ts
 import { kotori } from 'kotori'
@@ -68,6 +68,7 @@ export const { useT, dict, setLanguage, t } = kotori({
     secondaryLanguageTags: ['zh', 'ja', 'ms'],
 })
 
+// you can define your dicts in the same file or separate them by component, it's up to you
 const intro = dict({
     en: 'my name is {{name}}, I am {{age}} years old.',
     zh: '我叫{{name}}，我今年{{age}}岁了。',
@@ -82,37 +83,16 @@ const time = dict({
     ms: 'waktu {{time}}',
 // optional: type your arguments, by default it's `Record<'time', string | number>` in this example
 })<{ time: `${number}:${number}:${number}` }> 
-
-const weather = dict({
-    en: 'The weather in {{city}} has {{humidity}}% humidity.',
-    zh: '{{city}}的天气湿度为{{humidity}}%。',
-    ja: '{{city}}の湿度は{{humidity}}%です。',
-    ms: 'Cuaca di {{city}} mempunyai kelembapan {{humidity}}%.',
-})<{ city: string; humidity: number }>
-
-const score = dict({
-    en: 'Your score is {{score}} out of {{total}}.',
-    zh: '你的得分是 {{total}} 分中的 {{score}} 分。',
-    ja: 'あなたのスコアは {{total}} 点中 {{score}} 点です。',
-    ms: 'Markah anda ialah {{score}} daripada {{total}}.',
-})<{ score: number; total: number }>
-
-const lastLogin = dict({
-    en: 'Last login: {{date}} at {{time}}',
-    zh: '上次登录：{{date}} {{time}}',
-    ja: '最終ログイン：{{date}} {{time}}',
-    ms: 'Log masuk terakhir: {{date}} pada {{time}}',
-})<{ date: `${number}-${number}-${number}`; time: `${number}:${number}` }>
 ```
 
-**page1.tsx**
+### page1.tsx
 
 ```tsx
 import { useT, dict, setLanguage, t, intro, time } from './locales'
 
 export const Page1 = () => {
 
-    const { language } = useT()
+    const language  = useT()
 
     return (
         <>
@@ -133,10 +113,25 @@ export const Page1 = () => {
 }
 ```
 
-**page2.tsx**
+### page2.tsx
 
 ```tsx
-import { useT, dict, setLanguage, t, weather, score, lastLogin } from './locales'
+import { useT, dict, setLanguage, t, } from './locales'
+
+// you can also define dicts in the same file as your components, it's up to you
+const weather = dict({
+    en: 'The weather in {{city}} has {{humidity}}% humidity.',
+    zh: '{{city}}的天气湿度为{{humidity}}%。',
+    ja: '{{city}}の湿度は{{humidity}}%です。',
+    ms: 'Cuaca di {{city}} mempunyai kelembapan {{humidity}}%.',
+})<{ city: string; humidity: number }>
+
+const lastLogin = dict({
+    en: 'Last login: {{date}} at {{time}}',
+    zh: '上次登录：{{date}} {{time}}',
+    ja: '最終ログイン：{{date}} {{time}}',
+    ms: 'Log masuk terakhir: {{date}} pada {{time}}',
+})<{ date: `${number}-${number}-${number}`; time: `${number}:${number}` }>
 
 export const Page2 = () => {
 
@@ -145,7 +140,6 @@ export const Page2 = () => {
     return (
         <>
             <p>{t(weather, { city: 'Kuala Lumpur', humidity: 80 })}</p>
-            <p>{t(score, { score: 87, total: 100 })}</p>
             <p>{t(lastLogin, { date: '2024-04-24', time: '09:30' })}</p>
         </>
     )
@@ -203,15 +197,18 @@ Returns the translated string for the current language. `args` is required if th
 
 ### `useT()`
 
-React hook. Returns `{ language }`.
-
-| return | type | description |
-| --- | --- | --- |
-| `language` | `primaryLanguageTag` \| `secondaryLanguageTags` | The current language tag as a reactive value. Updates when `setLanguage` is called. |
+React hook. Returns the current language tag as a reactive value. Updates when `setLanguage` is called.
 
 ## Language Tags
 
 kotori uses [BCP 47](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) language tags. Both subtags (`en`, `zh`) and full tags (`en-US`, `zh-Hans`) are accepted and validated at the type level.
+
+## Tips
+
+- If you plan to add new languages frequently, consider colocating all your dicts in a single file. It is easier to copy the entire file and hand it to an AI to translate.
+- If your supported languages are fixed, consider splitting dicts by page or component. Translations stay close to the code that uses them and are easier to maintain. This approach also pairs well with TypeScript — every time you add a new language, type errors will guide you to every dict that needs updating.
+- Both approaches are tree-shakeable — only the dicts imported by the current page are included in its bundle.
+- The `primaryLanguageTag` is the source of truth for variable inference and validation. Write your primary language strings carefully — a variable rename in the primary string becomes a compile error across every secondary language, which is intentional.
 
 ## Roadmap
 
@@ -227,4 +224,3 @@ kotori uses [BCP 47](https://www.iana.org/assignments/language-subtag-registry/l
 There are already a lot of i18n libraries, and the good names are mostly taken. The original plan was *kotoba* (言葉), the Japanese word for "words" — also taken. Claude suggested *kotori* as an alternative, and it stuck.
 
 *Kotori* (小鳥) means "small bird" in Japanese. No deeper relevance to the library — it just sounds nice.
-

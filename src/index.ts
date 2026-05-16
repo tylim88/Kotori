@@ -33,7 +33,6 @@ export const kotori = <
 
 	const setLanguage = (tag: WorkingTags) => {
 		language = tag
-		snapshot = { ...snapshot, language }
 		listeners.forEach((listener) => {
 			listener()
 		})
@@ -57,7 +56,7 @@ export const kotori = <
 			? []
 			: [NonNullable<ReturnType<DictCallback>[typeof _args]>]
 	) => {
-		let locale = dict().translation[language] || 'unable_to_load_translations'
+		let locale = dict().translation[language] ?? 'unable_to_load_translations'
 		for (const objKey in args[0]) {
 			locale = locale.replace(
 				new RegExp(`\\{\\{\\s*${objKey}\\s*\\}\\}`, 'g'),
@@ -65,9 +64,6 @@ export const kotori = <
 			)
 		}
 		return locale as string
-	}
-	let snapshot = {
-		language,
 	}
 
 	return {
@@ -106,8 +102,8 @@ export const kotori = <
 		useT: () =>
 			useSyncExternalStore(
 				subscribe,
-				() => snapshot,
-				() => snapshot,
+				() => language,
+				() => language,
 			),
 	}
 }

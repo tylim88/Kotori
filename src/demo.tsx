@@ -22,7 +22,7 @@ const time = dict({
 })<{ time: `${number}:${number}:${number}` }>
 
 const Page1 = () => {
-	const { language } = useT()
+	const language = useT()
 	return (
 		<>
 			<p>Page 1</p>
@@ -64,7 +64,7 @@ const lastLogin = dict({
 })<{ date: `${number}-${number}-${number}`; time: `${number}:${number}` }>
 
 export const Page2 = () => {
-	const { language } = useT()
+	const language = useT()
 	return (
 		<>
 			<p>Page 2</p>

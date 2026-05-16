@@ -27,7 +27,7 @@ const typedVar = dict({
 	ja: '時間 {{time}}',
 })<{ time: `${number}:${number}` }>
 
-declare const language: ReturnType<typeof useT>['language']
+declare const language: ReturnType<typeof useT>
 
 // ============================
 // dict — variable mismatch
