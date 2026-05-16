@@ -18,7 +18,7 @@ type ExtractVariables<T extends string> =
 		? Trim<P> | ExtractVariables<Q>
 		: never
 
-declare const _: unique symbol
+declare const _args: unique symbol
 
 export const kotori = <
 	const PrimaryTag extends AllTags,
@@ -44,24 +44,24 @@ export const kotori = <
 		}
 	}
 	const t = <
-		DictCallback extends () => Readonly<{
+		Dict extends () => Readonly<{
 			translation: Record<WorkingTags, string>
-			[_]?: Record<string, string | number>
+			[_args]?: Record<string, string | number>
 		}>,
 	>(
-		dict: DictCallback,
-		...args: keyof NonNullable<ReturnType<DictCallback>[typeof _]> extends never
+		dict: Dict,
+		...args: keyof NonNullable<ReturnType<Dict>[typeof _args]> extends never
 			? []
-			: [NonNullable<ReturnType<DictCallback>[typeof _]>]
+			: [NonNullable<ReturnType<Dict>[typeof _args]>]
 	) => {
-		let locale = dict().translation[language]
+		let locale = dict().translation[language] || '' // defensive code
 		for (const objKey in args[0]) {
 			locale = locale.replace(
 				new RegExp(`\\{\\{\\s*${objKey}\\s*\\}\\}`, 'g'),
 				() => String(args[0]?.[objKey]),
 			)
 		}
-		return locale as string
+		return locale
 	}
 
 	return {
@@ -94,7 +94,7 @@ export const kotori = <
 			>() =>
 				({ translation }) as Readonly<{
 					translation: typeof translation
-					[_]?: ArgsType
+					[_args]?: ArgsType
 				}>,
 
 		useT: () =>
