@@ -44,36 +44,37 @@ export const kotori = <
 			listeners.delete(listener)
 		}
 	}
-
+	const t = <
+		DictCallback extends () => Readonly<{
+			translation: Record<WorkingTags, string>
+			[_args]?: Record<string, string | number>
+		}>,
+	>(
+		dict: DictCallback,
+		...args: keyof NonNullable<
+			ReturnType<DictCallback>[typeof _args]
+		> extends never
+			? []
+			: [NonNullable<ReturnType<DictCallback>[typeof _args]>]
+	) => {
+		let locale = dict().translation[language] || 'unable_to_load_translations'
+		for (const objKey in args[0]) {
+			locale = locale.replace(
+				new RegExp(`\\{\\{\\s*${objKey}\\s*\\}\\}`, 'g'),
+				() => String(args[0]?.[objKey]),
+			)
+		}
+		return locale as string
+	}
 	let snapshot = {
 		language,
 		setLanguage,
-		t: <
-			DictCallback extends () => Readonly<{
-				translation: Record<WorkingTags, string>
-				[_args]?: Record<string, string | number>
-			}>,
-		>(
-			dict: DictCallback,
-			...args: keyof NonNullable<
-				ReturnType<DictCallback>[typeof _args]
-			> extends never
-				? []
-				: [NonNullable<ReturnType<DictCallback>[typeof _args]>]
-		) => {
-			let locale = dict().translation[language] || 'unable_to_load_translations'
-			for (const objKey in args[0]) {
-				locale = locale.replace(
-					new RegExp(`\\{\\{\\s*${objKey}\\s*\\}\\}`, 'g'),
-					() => String(args[0]?.[objKey]),
-				)
-			}
-			return locale as string
-		},
+		t,
 	}
 
 	return {
 		setLanguage,
+		t,
 		dict:
 			<
 				const PrimaryString extends string,

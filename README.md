@@ -5,7 +5,7 @@
 Strongly-typed, modular i18n for React. Variables are inferred directly from your strings — no codegen, no JSON, no schema files.
 
 ```ts
-const { dict } = kotori({
+const { dict, t } = kotori({
     primaryLanguageTag: 'en',
     secondaryLanguageTags: ['zh', 'ja', 'ms'],
 })
@@ -180,7 +180,7 @@ export const { useT, dict, setLanguage } = kotori({
 | `primaryLanguageTag` | `BCP47LanguageTag` | The source language. Drives variable inference. |
 | `secondaryLanguageTags` | `BCP47LanguageTag[]` | Additional supported languages. |
 
-Returns `{ dict, useT, setLanguage }`.
+Returns `{ dict, useT, setLanguage, t }`.
 
 ### `dict(translations)<argsType?>`
 
@@ -203,6 +203,10 @@ const time = dict({ en: '{{hour}}:{{minute}}' })<{
 
 Updates the current language and rerenders all active `useT` consumers across all pages. Available directly on the `kotori` instance — useful for calling outside of React (route guards, axios interceptors, etc.).
 
+### `t(dict, args?)` 
+
+Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't. Available directly on the `kotori` instance for non-React usage, but typically accessed via the `useT` hook.
+
 ### `useT()`
 
 React hook. Returns `{ t, language, setLanguage }`.
@@ -224,6 +228,7 @@ kotori uses [BCP 47](https://www.iana.org/assignments/language-subtag-registry/l
 - Pluralization support
 - Gender support
 - Value formatting (date, number, currency)
+- Support for non-React frameworks (Vue, Svelte, Angular, etc.)
 
 ## Trivial
 
