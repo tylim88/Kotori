@@ -53,16 +53,11 @@ export const kotori = <
 		...args: keyof NonNullable<ReturnType<Dict>[typeof _args]> extends never
 			? []
 			: [NonNullable<ReturnType<Dict>[typeof _args]>]
-	) => {
-		let locale = dict().translation[language] || '' // defensive code
-		for (const objKey in args[0]) {
-			locale = locale.replace(
-				new RegExp(`\\{\\{\\s*${objKey}\\s*\\}\\}`, 'g'),
-				() => String(args[0]?.[objKey]),
-			)
-		}
-		return locale
-	}
+	) =>
+		(dict().translation[language] || '').replace(
+			/\{\{\s*([\w-]+)\s*\}\}/g,
+			(_, key) => String(args[0]?.[key]),
+		)
 
 	return {
 		setLanguage,
