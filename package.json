@@ -17,7 +17,8 @@
 	"lint-staged": {
 		"*": [
 			"npm run lint",
-			"npm test"
+			"npm test",
+			"npx tsc"
 		]
 	},
 	"type": "module",
