@@ -2,7 +2,16 @@
   <img src="logo.webp" alt="kotori i18n logo">
 </p>
 
-Strongly-typed, modular i18n for React. Variables are inferred directly from your strings — no codegen, no JSON, no schema files.
+<p align="center">
+  <a href="https://www.npmjs.com/package/kotori"><img src="https://img.shields.io/npm/v/kotori?color=crimson" alt="NPM Version"></a>
+  <img src="https://img.shields.io/badge/dependencies-0-success" alt="Dependencies">
+  <a href="https://github.com/tylim88/Kotori/blob/main/LICENSE"><img src="https://img.shields.io/github/license/tylim88/Kotori?color=blue" alt="License"></a>
+  <img src="https://img.shields.io/badge/bundle%20size-0.28kB-emerald" alt="Bundle Size">
+</p>
+
+<p align="center">
+🕊️ Kotori is a zero-config, fully type-safe, and modular internationalization library for React that compiles down to just 0.28kB. No JSON, no external CLI tools, no codegen—just live type inference from your strings.
+</p>
 
 ```ts
 const { dict, t } = kotori({
