@@ -1,7 +1,7 @@
 {
 	"name": "kotori",
 	"description": "Strongly-typed and composable internationalization library for React",
-	"version": "5.0.1",
+	"version": "5.0.2",
 	"scripts": {
 		"setup": "rm -rf node_modules && npm i && git init && husky",
 		"prepublishOnly": "npm i && npx tsc && npm run build",
