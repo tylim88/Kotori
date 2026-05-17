@@ -1,5 +1,13 @@
 v5.0.4 Code quality rated by Sonnet 4.6 on 17th May 2026
 
+Currently there is no good solution for `dict` double call, hopefully in future typescript generic can skip arguments.
+
+Claude suggested a very clever api design api design for `t`, allowing me to dropped almost all memory management code.
+
+Claude also suggested the use of phantom type here.
+
+=====================================================
+
 **Overall: 8.5/10**
 
 ---

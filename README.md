@@ -200,13 +200,25 @@ const time = dict({ en: '{{hour}}:{{minute}}' })<{
 
 Updates the current language and rerenders all active `useT` consumers across all pages. Available directly on the `kotori` instance — useful for calling outside of React (route guards, axios interceptors, etc.).
 
+```ts
+setLanguage('zh')
+```
+
 ### `t(dict, args?)` 
 
 Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't. Available directly on the `kotori` instance for non-React usage.
 
+```tsx
+<p>{t(intro, { name: 'John', age: 30 })}</p>
+```
+
 ### `useT()`
 
 React hook. Returns the current language tag as a reactive value. Updates when `setLanguage` is called.
+
+```ts
+const language = useT()
+```
 
 ## Language Tags
 
