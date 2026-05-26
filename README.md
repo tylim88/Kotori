@@ -14,6 +14,10 @@
 🕊️ Kotori is a zero-config, fully type-safe, and modular internationalization library for React that compiles down to just 0.28kB. No JSON, no external CLI tools, no codegen—just live type inference from your strings.
 </p>
 
+## Note
+
+⚠️ Doesn't work with React Compiler!!
+
 ```ts
 const { dict, t } = kotori({
     primaryLanguageTag: 'en',
@@ -227,8 +231,8 @@ kotori uses [BCP 47](https://www.iana.org/assignments/language-subtag-registry/l
 
 ## Tips
 
-- If you plan to add new languages frequently, consider colocating all your dicts in a single file. It is easier to copy the entire file and hand it to an AI to translate.
-- If your supported languages are fixed, consider splitting dicts by page or component. Translations stay close to the code that uses them and are easier to maintain. This approach also pairs well with TypeScript — every time you add a new language, type errors will guide you to every dict that needs updating.
+- If you plan to add new languages frequently, consider colocating all your dicts in a single file or multiple files in one folder. It is easier to copy the entire file and hand it to an AI to translate.
+- If your supported languages are fixed, consider splitting dicts by page or component. Translations stay close to the code that uses them and are easier to maintain.  
 - Both approaches are tree-shakeable — only the dicts imported by the current page are included in its bundle.
 
 ## Roadmap
