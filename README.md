@@ -14,18 +14,14 @@
 🕊️ Kotori is a zero-config, fully type-safe, and modular internationalization library for React that compiles down to just 0.28kB. No JSON, no external CLI tools, no codegen—just live type inference from your strings.
 </p>
 
-## Note
-
-⚠️ Doesn't work with React Compiler!!
-
 ```ts
-const { dict, t } = kotori({
-    primaryLanguageTag: 'en',
-    secondaryLanguageTags: ['zh', 'ja', 'ms'],
+const { d, useT } = kotori({
+    primary: 'en',
+    secondaries: ['zh', 'ja', 'ms'],
 })
 
 // ❌ TypeScript error: missing japanese translation
-const intro = dict({ 
+const intro = d({ 
     // ⭐ base string drives the type contract
     en: 'Hello {{name}}, is it {{time}} now?', 
 
@@ -38,18 +34,21 @@ const intro = dict({
 // optional: type your arguments, by default it's `Record<'name'|'time', string | number>` in this example
 })<{name: string; time: `${number}:${number}`}> 
 
+const Component = () => {
+    const { t } = useT()
 
-// ✅ Works
-t(intro, { name: 'John', time: '12:25' }) 
+    // ✅ Works
+    t(intro, { name: 'John', time: '12:25' }) 
 
-// ❌ TypeScript error: missing { name }
-t(intro, { time: '12:25' })
+    // ❌ TypeScript error: missing { name }
+    t(intro, { time: '12:25' })
 
-// ❌ TypeScript error: unknown key 'nama'                   
-t(intro, { nama: 'John', time: '12:25' }) 
+    // ❌ TypeScript error: unknown key 'nama'                   
+    t(intro, { nama: 'John', time: '12:25' }) 
 
-// ❌ TypeScript error: invalid format for 'time'
-t(intro, { name: 'John', time: '12-00' }) 
+    // ❌ TypeScript error: invalid format for 'time'
+    t(intro, { name: 'John', time: '12-00' }) 
+}
 ```
 
 - No codegen
@@ -77,20 +76,20 @@ npm i kotori
 ```ts
 import { kotori } from 'kotori'
 
-export const { useT, dict, setLanguage, t } = kotori({
-    primaryLanguageTag: 'en',
-    secondaryLanguageTags: ['zh', 'ja', 'ms'],
+export const { useT, d, setLanguage } = kotori({
+    primary: 'en',
+    secondaries: ['zh', 'ja', 'ms'],
 })
 
 // you can define your dicts in the same file or separate them by component, it's up to you
-export const intro = dict({
+export const intro = d({
     en: 'my name is {{name}}, I am {{age}} years old.',
     zh: '我叫{{name}}，我今年{{age}}岁了。',
     ja: '私の名前は{{name}}で、{{age}}歳です。',
     ms: 'nama saya {{name}}, saya berumur {{age}} tahun.',
 })
 
-export const time = dict({
+export const time = d({
     en: 'time {{time}}',
     zh: '时间 {{time}}',
     ja: '時間 {{time}}',
@@ -102,11 +101,11 @@ export const time = dict({
 ### page1.tsx
 
 ```tsx
-import { useT, dict, setLanguage, t, intro, time } from './locales'
+import { useT, setLanguage, intro, time } from './locales'
 
 export const Page1 = () => {
 
-    const language  = useT()
+    const { language, t } = useT()
 
     return (
         <>
@@ -130,17 +129,17 @@ export const Page1 = () => {
 ### page2.tsx
 
 ```tsx
-import { useT, dict, setLanguage, t, } from './locales'
+import { useT, d } from './locales'
 
 // you can also define dicts in the same file as your components, it's up to you
-const weather = dict({
+const weather = d({
     en: 'The weather in {{city}} has {{humidity}}% humidity.',
     zh: '{{city}}的天气湿度为{{humidity}}%。',
     ja: '{{city}}の湿度は{{humidity}}%です。',
     ms: 'Cuaca di {{city}} mempunyai kelembapan {{humidity}}%.',
 })<{ city: string; humidity: number }>
 
-const lastLogin = dict({
+const lastLogin = d({
     en: 'Last login: {{date}} at {{time}}',
     zh: '上次登录：{{date}} {{time}}',
     ja: '最終ログイン：{{date}} {{time}}',
@@ -149,7 +148,7 @@ const lastLogin = dict({
 
 export const Page2 = () => {
 
-    useT()
+    const { t } = useT()
 
     return (
         <>
@@ -171,31 +170,31 @@ Creates a scoped i18n instance.
 ```ts
 import { kotori } from 'kotori'
 
-export const { useT, dict, setLanguage } = kotori({
-    primaryLanguageTag: 'en',
-    secondaryLanguageTags: ['zh', 'ja', 'ms'],
+export const { useT, d, setLanguage } = kotori({
+    primary: 'en',
+    secondaries: ['zh', 'ja', 'ms'],
 })
 ```
 
 | option | type | description |
 | --- | --- | --- |
-| `primaryLanguageTag` | `BCP47LanguageTag` | The source language. Drives variable inference. |
-| `secondaryLanguageTags` | `BCP47LanguageTag[]` | Additional supported languages. |
+| `primary` | `BCP47LanguageTag` | The source language. Drives variable inference. |
+| `secondaries` | `BCP47LanguageTag[]` | Additional supported languages. |
 
-Returns `{ dict, useT, setLanguage, t }`.
+Returns `{ d, useT, setLanguage, r }`.
 
-### `dict(translations)<argsType?>`
+### `d(translations)<argsType?>`
 
-Defines a translation unit. Takes one string per language.
+Defines a translation unit. Takes one string per language. Return `dictionary` object.
 
 ```ts
-const time = dict({ en: '{{hour}}:{{minute}}' })
+const time = d({ en: '{{hour}}:{{minute}}' })
 ```
 
 By default, variables are typed as `string | number`. Pass a generic to narrow them:
 
 ```ts
-const time = dict({ en: '{{hour}}:{{minute}}' })<{
+const time = d({ en: '{{hour}}:{{minute}}' })<{
     hour: number
     minute: number
 }>
@@ -209,20 +208,32 @@ Updates the current language and rerenders all active `useT` consumers across al
 setLanguage('zh')
 ```
 
-### `t(dict, args?)` 
+### `r(dictionary, args?)`
 
-Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't. Available directly on the `kotori` instance for non-React usage.
+Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't.
+
+⚠️ Do not call this inside React components (it will break React Compiler optimization rules). Use this exclusively in raw JS/TS environments like router guards, API interceptors, or state utilities.
 
 ```tsx
-<p>{t(intro, { name: 'John', age: 30 })}</p>
+r(intro, { name: 'John', age: 30 })}
 ```
 
 ### `useT()`
 
-React hook. Returns the current language tag as a reactive value. Updates when `setLanguage` is called.
+React hook. Returns the current language tag as a reactive value. Updates when `setLanguage` is called. Returns `{ t, language }`.
 
 ```ts
-const language = useT()
+const { t, language } = useT()
+```
+
+### `t(dictionary, args?)`
+
+Returns the translated string for the current language. `args` is required if the string has variables, omitted if it doesn't.
+
+React version of `r(dictionary, args?)`, works with React Compiler.
+
+```tsx
+<p>{t(intro, { name: 'John', age: 30 })}</p>
 ```
 
 ## Language Tags
@@ -242,10 +253,9 @@ kotori uses [BCP 47](https://www.iana.org/assignments/language-subtag-registry/l
 - Pluralization support
 - Gender support
 - Value formatting (date, number, currency)
-- Support for non-React frameworks (Vue, Svelte, Angular, etc.)
 
 ## Trivial
 
-There are already a lot of i18n libraries, and the good names are mostly taken. The original plan was *kotoba* (言葉), the Japanese word for "words" — also taken. Claude suggested *kotori* as an alternative, and it stuck.
+There are already many i18n libraries, and the good names are mostly taken. The original plan was *kotoba* (言葉), the Japanese word for "words" — also taken. Claude suggested *kotori* as an alternative, and it stuck.
 
 *Kotori* (小鳥) means "small bird" in Japanese. No deeper relevance to the library — it just sounds nice.

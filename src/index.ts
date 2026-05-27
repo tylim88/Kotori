@@ -21,18 +21,40 @@ type ExtractVariables<T extends string> =
 declare const _args: unique symbol
 
 export const kotori = <
-	const PrimaryTag extends AllTags,
-	const SecondaryTags extends Exclude<AllTags, PrimaryTag>,
+	const Primary extends AllTags,
+	const Secondary extends Exclude<AllTags, Primary>,
 >(props: {
-	primaryLanguageTag: PrimaryTag
-	secondaryLanguageTags: SecondaryTags[]
+	primary: Primary
+	secondaries: Secondary[]
 }) => {
 	const listeners = new Set<() => void>()
-	type WorkingTags = PrimaryTag | SecondaryTags
-	let language = props.primaryLanguageTag as WorkingTags
+	type Language = Primary | Secondary
+	const t = <
+		Dictionary extends () => Readonly<{
+			d: Record<Language, string>
+			[_args]?: Record<string, string | number>
+		}>,
+	>(
+		dictionary: Dictionary,
+		...args: keyof NonNullable<
+			ReturnType<Dictionary>[typeof _args]
+		> extends never
+			? []
+			: [NonNullable<ReturnType<Dictionary>[typeof _args]>]
+	) =>
+		(dictionary().d[snapshot.language] || '').replace(
+			/\{\{\s*([\w-]+)\s*\}\}/g,
+			(_, key) => String(args[0]?.[key]),
+		)
 
-	const setLanguage = (tag: WorkingTags) => {
-		language = tag
+	let snapshot = { language: props.primary as Language, t }
+
+	const setLanguage = (language: Language) => {
+		snapshot = {
+			language,
+			//@ts-expect-error
+			t: (...args) => t(...args),
+		}
 		listeners.forEach((listener) => {
 			listener()
 		})
@@ -43,30 +65,15 @@ export const kotori = <
 			listeners.delete(listener)
 		}
 	}
-	const t = <
-		Dict extends () => Readonly<{
-			translation: Record<WorkingTags, string>
-			[_args]?: Record<string, string | number>
-		}>,
-	>(
-		dict: Dict,
-		...args: keyof NonNullable<ReturnType<Dict>[typeof _args]> extends never
-			? []
-			: [NonNullable<ReturnType<Dict>[typeof _args]>]
-	) =>
-		(dict().translation[language] || '').replace(
-			/\{\{\s*([\w-]+)\s*\}\}/g,
-			(_, key) => String(args[0]?.[key]),
-		)
 
 	return {
 		setLanguage,
-		t,
-		dict:
+		r: t,
+		d:
 			<
 				const PrimaryString extends string,
 				const SecondaryObject extends {
-					[Key in SecondaryTags]: ExtractVariables<PrimaryString> extends infer PrimaryVariables
+					[Key in Secondary]: ExtractVariables<PrimaryString> extends infer PrimaryVariables
 						? ExtractVariables<
 								SecondaryObject[Key] & string
 							> extends infer SecondaryVariables
@@ -79,7 +86,7 @@ export const kotori = <
 						: never
 				},
 			>(
-				translation: { [Key in PrimaryTag]: PrimaryString } & SecondaryObject,
+				dictionary: { [Key in Primary]: PrimaryString } & SecondaryObject,
 			) =>
 			<
 				const ArgsType extends Record<
@@ -87,16 +94,16 @@ export const kotori = <
 					string | number
 				> = Record<ExtractVariables<PrimaryString>, string | number>,
 			>() =>
-				({ translation }) as Readonly<{
-					translation: typeof translation
+				({ d: dictionary }) as Readonly<{
+					d: typeof dictionary
 					[_args]?: ArgsType
 				}>,
 
 		useT: () =>
 			useSyncExternalStore(
 				subscribe,
-				() => language,
-				() => language,
+				() => snapshot,
+				() => snapshot,
 			),
 	}
 }

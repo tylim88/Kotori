@@ -2,19 +2,19 @@ import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { kotori } from '.'
 
-const { useT, dict, setLanguage, t } = kotori({
-	primaryLanguageTag: 'en',
-	secondaryLanguageTags: ['zh', 'ja', 'ms'],
+const { useT, d, setLanguage } = kotori({
+	primary: 'en',
+	secondaries: ['zh', 'ja', 'ms'],
 })
 
-const intro = dict({
+const intro = d({
 	en: 'my name is {{name}}, I am {{age}} years old.',
 	zh: '我叫{{name}}，我今年{{age}}岁了。',
 	ja: '私の名前は{{name}}で、{{age}}歳です。',
 	ms: 'nama saya {{name}}, saya berumur {{age}} tahun.',
 })
 
-const time = dict({
+const time = d({
 	en: 'time {{time}}',
 	zh: '时间 {{time}}',
 	ja: '時間 {{time}}',
@@ -22,7 +22,7 @@ const time = dict({
 })<{ time: `${number}:${number}:${number}` }>
 
 const Page1 = () => {
-	const language = useT()
+	const { language, t } = useT()
 	return (
 		<>
 			<p>Page 1</p>
@@ -42,21 +42,21 @@ const Page1 = () => {
 	)
 }
 
-const weather = dict({
+const weather = d({
 	en: 'The weather in {{city}} has {{humidity}}% humidity.',
 	zh: '{{city}}的天气湿度为{{humidity}}%。',
 	ja: '{{city}}の湿度は{{humidity}}%です。',
 	ms: 'Cuaca di {{city}} mempunyai kelembapan {{humidity}}%.',
 })<{ city: string; humidity: number }>
 
-const score = dict({
+const score = d({
 	en: 'Your score is {{score}} out of {{total}}.',
 	zh: '你的得分是 {{total}} 分中的 {{score}} 分。',
 	ja: 'あなたのスコアは {{total}} 点中 {{score}} 点です。',
 	ms: 'Markah anda ialah {{score}} daripada {{total}}.',
 })<{ score: number; total: number }>
 
-const lastLogin = dict({
+const lastLogin = d({
 	en: 'Last login: {{date}} at {{time}}',
 	zh: '上次登录：{{date}} {{time}}',
 	ja: '最終ログイン：{{date}} {{time}}',
@@ -64,7 +64,7 @@ const lastLogin = dict({
 })<{ date: `${number}-${number}-${number}`; time: `${number}:${number}` }>
 
 const Page2 = () => {
-	const language = useT()
+	const { language, t } = useT()
 	return (
 		<>
 			<p>Page 2</p>
