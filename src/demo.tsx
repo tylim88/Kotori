@@ -2,7 +2,7 @@ import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { kotori } from './kotori'
 
-const { useT, d, setLanguage } = kotori({
+const { useT, d, setLanguage, r } = kotori({
 	primary: 'en',
 	secondaries: ['zh', 'ja', 'ms'],
 })

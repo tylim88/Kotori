@@ -233,7 +233,13 @@ Returns the translated string for the current language. `args` is required if th
 React version of `r(dictionary, args?)`, works with React Compiler.
 
 ```tsx
-<p>{t(intro, { name: 'John', age: 30 })}</p>
+const Intro = () => {
+    const { t } = useT()
+
+    return (
+        <p>{t(intro, { name: 'John', age: 30 })}</p>
+    )
+}
 ```
 
 ## Language Tags
