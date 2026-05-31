@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-🕊️ Kotori is a zero-config, fully type-safe, and modular internationalization library for React that compiles down to just 0.28kB. No JSON, no external CLI tools, no codegen—just live type inference from your strings.
+🕊️ Kotori is a zero-config, fully type-safe, and modular internationalization library for React that compiles down to just 0.29kB. No JSON, no external CLI tools, no codegen—just live type inference from your strings.
 </p>
 
 ```ts
@@ -55,11 +55,11 @@ const Component = () => {
 - No JSON
 - No dependencies
 - No build step
-- 0.28kB minified and gzipped
+- 0.29kB minified and gzipped
 - Modular and tree-shakeable
 - Language change in one page rerenders all pages
 - Variables typed and inferred from string literals — no more string typos
-- maximum type safety with minimum types
+- Maximum type safety with minimum types
 
 Demo: <https://stackblitz.com/edit/kotori?file=src%2FApp.tsx>
 
@@ -163,7 +163,7 @@ export const Page2 = () => {
 
 ![how kotori works](image.webp) 
 
-### `kotori(options)`
+### `kotori(options)` (0.29kB)
 
 Creates a scoped i18n instance.
 
@@ -178,14 +178,14 @@ export const { useT, d, setLanguage } = kotori({
 
 | option | type | description |
 | --- | --- | --- |
-| `primary` | `BCP47LanguageTag` | The source language. Drives variable inference. |
-| `secondaries` | `BCP47LanguageTag[]` | Additional supported languages. |
+| `primary` | `BCP47LanguageTagWithSubtag` | The source language. Drives variable inference. |
+| `secondaries` | `Exclude<BCP47LanguageTagWithSubtag, primary>[]` | Additional supported languages. Cannot include the primary language. |
 
 Returns `{ d, useT, setLanguage, r }`.
 
 ### `d(translations)<argsType?>`
 
-Defines a translation unit. Takes one string per language. Return `dictionary` object.
+Defines a translation unit. Takes one string per language. Returns a `dictionary` object.
 
 ```ts
 const time = d({ en: '{{hour}}:{{minute}}' })
@@ -215,7 +215,7 @@ Returns the translated string for the current language. `args` is required if th
 ⚠️ Do not call this inside React components (it will break React Compiler optimization rules). Use this exclusively in raw JS/TS environments like router guards, API interceptors, or state utilities.
 
 ```tsx
-r(intro, { name: 'John', age: 30 })}
+r(intro, { name: 'John', age: 30 })
 ```
 
 ### `useT()`
@@ -242,18 +242,60 @@ const Intro = () => {
 }
 ```
 
+### `detectLanguage(instance, options?)` (0.12kB with Kotori or 0.2kB standalone)
+
+Detects the user's preferred language from browser settings and sets it on the kotori instance. Iterates through the user's full language preference list in order, stopping at the first match.
+
+```ts
+import { detectLanguage } from 'kotori'
+import { i18n } from './locales'
+
+detectLanguage(i18n)
+```
+
+| option | type | default | description |
+| --- | --- | --- | --- |
+| `fallbackToSubtag` | `boolean` | `true` | If no exact match is found (e.g. `'zh-CN'`), fall back to the subtag (e.g. `'zh'`). |
+
+```ts
+// browser reports: ['zh-CN', 'en-US']
+// declared languages: ['en', 'zh', 'ja', 'ms']
+
+detectLanguage(i18n)
+// 'zh-CN' → no exact match → subtag 'zh' → match → setLanguage('zh') ✅
+
+detectLanguage(i18n, { fallbackToSubtag: false })
+// 'zh-CN' → no exact match → 'en-US' → no exact match → no-op, stays 'en'
+```
+
+`detectLanguage` also works with non-kotori instances. Any object with a `setLanguage` callback and a `config` object satisfies the interface:
+
+```ts
+detectLanguage({
+    setLanguage: (lang: 'en' | 'zh') => mySetLang(lang),
+    config: { primary: 'en', secondaries: ['zh'] },
+})
+```
+
 ## Language Tags
 
-kotori uses [BCP 47](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) language tags. Both subtags (`en`, `zh`) and full tags (`en-US`, `zh-CN`) are accepted and validated at the type level.
+kotori uses [BCP 47](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry) language tags. The type `BCP47LanguageTagWithSubtag` accepts both subtags (`en`, `zh`) and full tags (`en-US`, `zh-CN`), and is validated at the type level.
+
+```ts
+kotori({ primary: 'en', secondaries: ['zh', 'ms-MY'] })  // ✅
+kotori({ primary: 'klingon', secondaries: ['zh'] })       // ❌ compile error
+```
 
 ## Tips
 
 - If you plan to add new languages frequently, consider colocating all your dicts in a single file or multiple files in one folder. It is easier to copy the entire file and hand it to an AI to translate.
-- If your supported languages are fixed, consider splitting dicts by page or component. Translations stay close to the code that uses them and are easier to maintain.  
+- If your supported languages are fixed, consider splitting dicts by page or component. Translations stay close to the code that uses them and are easier to maintain. This approach also pairs well with TypeScript — every time you add a new language, type errors will guide you to every dict that needs updating.
 - Both approaches are tree-shakeable — only the dicts imported by the current page are included in its bundle.
+- The `primary` language is the source of truth for variable inference and validation. Write your primary language strings carefully — a variable rename in the primary string becomes a compile error across every secondary language, which is intentional.
 
 ## Roadmap
 
+- ✅ Auto detect locale from browser settings
 - Auto persist language selection to localStorage
 - Pluralization support
 - Gender support
