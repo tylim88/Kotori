@@ -61,7 +61,7 @@ const Component = () => {
 - Variables typed and inferred from string literals — no more string typos
 - maximum type safety with minimum types
 
-Demo: <https://stackblitz.com/edit/vitejs-vite-nyxwmhre?file=src%2FApp.tsx>
+Demo: <https://stackblitz.com/edit/kotori?file=src%2FApp.tsx>
 
 ## Installation
 
@@ -254,7 +254,6 @@ kotori uses [BCP 47](https://www.iana.org/assignments/language-subtag-registry/l
 
 ## Roadmap
 
-- Auto detect locale from browser settings
 - Auto persist language selection to localStorage
 - Pluralization support
 - Gender support
