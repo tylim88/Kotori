@@ -5,7 +5,7 @@ export type Tags = BCP47LanguageTagName
 export type SubTags = BCP47LanguageTagName extends `${infer SubTag}-${string}`
 	? SubTag
 	: never
-export type AllTags = Tags | SubTags
+export type BCP47LanguageTagNameWithSubTag = Tags | SubTags
 
 type Trim<T extends string> = T extends ` ${infer R}`
 	? Trim<R>
@@ -24,26 +24,28 @@ declare const _args: unique symbol
  * Creates a scoped i18n instance for your app.
  * Call once and export the returned utilities.
  *
- * @param {Object} props - Configuration options
- * @param props.primary - {BCP47LanguageTag} — The source language. All other strings are validated against it.
- * @param props.secondaries - `BCP47LanguageTag[]` — Additional supported languages.
- * @returns `{ d, t, useT, setLanguage }`
+ * @param config - Configuration options.
+ * @param config.primary - `BCP47LanguageTag` — The source language. Variable inference and
+ * secondary string validation are both driven by this language's strings.
+ * @param config.secondaries - `Exclude<BCP47LanguageTag, primary>[]` — Additional supported languages.
+ * Cannot include the primary language.
+ * @returns `{ d, r, useT, setLanguage, config }`
  *
  * @example
  * ```ts
  * // locales.ts
  * import { kotori } from 'kotori'
  *
- * export const { d, useT, setLanguage, r } = kotori({
+ * export const { d, r, useT, setLanguage } = kotori({
  *   primary: 'en',
  *   secondaries: ['zh', 'ja', 'ms'],
  * })
  * ```
  */
 export const kotori = <
-	const Primary extends AllTags,
-	const Secondary extends Exclude<AllTags, Primary>,
->(props: {
+	const Primary extends BCP47LanguageTagNameWithSubTag,
+	const Secondary extends Exclude<BCP47LanguageTagNameWithSubTag, Primary>,
+>(config: {
 	primary: Primary
 	secondaries: Secondary[]
 }) => {
@@ -64,6 +66,8 @@ export const kotori = <
 	 *     return (
 	 *         <p>{t(greeting)}</p>                             // ✅ no args needed
 	 *         <p>{t(intro, { name: 'John', age: 30 })}</p>     // ✅ typed args
+	 *         <p>{t(intro)}</p>                                // ❌ compile error: missing args
+	 *         <p>{t(intro, { name: 'John', x: 30 })}</p>       // ❌ compile error: unknown key 'x'
 	 *     )
 	 * }
 	 */
@@ -85,19 +89,31 @@ export const kotori = <
 			(_, key) => String(args[0]?.[key]),
 		)
 
-	let snapshot = { language: props.primary as Language, t }
+	let snapshot = { language: config.primary as Language, t }
 
 	/**
 	 * Updates the current language and triggers a rerender in all active
 	 * `useT()` consumers across all pages. Safe to call outside React.
 	 *
-	 * @param language - `Language` — Must be one of the tags declared in `primary` or `secondaries`.
+	 * @param language - `Language` — Must be one of the tags declared in
+	 * `primary` or `secondaries`. Any other value is a compile error.
+	 * @returns `void`
 	 *
 	 * @example
 	 * ```ts
 	 * import { setLanguage } from './locales'
 	 *
-	 * setLanguage('zh')    // ✅
+	 * setLanguage('zh')      // ✅
+	 * setLanguage('ms')      // ✅
+	 * setLanguage('de')      // ❌ compile error: 'de' was not declared
+	 *
+	 * // persist and restore language selection
+	 * setLanguage('zh')
+	 * localStorage.setItem('lang', 'zh')
+	 *
+	 * // restore on app startup
+	 * const saved = localStorage.getItem('lang')
+	 * if (saved) setLanguage(saved as 'en')
 	 * ```
 	 */
 	const setLanguage = (language: Language) => {
@@ -118,57 +134,95 @@ export const kotori = <
 	}
 
 	return {
-		s: props.secondaries,
+		config,
 		setLanguage,
 		/**
 		 * Translates a dict to the current language and interpolates variables.
-		 * for use outside React components (route guards, axios interceptors, etc.).
+		 * For use **outside** React components — route guards, axios interceptors,
+		 * utility functions, etc.
 		 *
-		 * ⚠️ Do not call this inside React components (it will break React Compiler optimization rules).
-		 * Use this exclusively in raw JS/TS environments like router guards, API interceptors, or state utilities.
+		 * ⚠️ Do not use inside React components. The React Compiler will memoize
+		 * the result permanently since `r` is a stable module-level reference,
+		 * causing stale translations after a language change. Use `t` from `useT()`
+		 * inside components instead.
 		 *
 		 * @param dictionary - A dict created by `d()`.
-		 * @param args - `Record<string, string | number>` — Variable values to interpolate. Required if the dict has variables, omitted if it doesn't.
-		 * @returns `string` — The translated and interpolated string.
+		 * @param args - `Record<string, string | number>` — Variable values to interpolate.
+		 * Required if the dict has variables, omitted if it doesn't.
+		 * @returns `string` — The translated and interpolated string in the current language.
 		 *
 		 * @example
 		 * ```ts
-		 * // outside React — use t from kotori instance
-		 * import { r } from './locales'
+		 * import { r, greeting, intro } from './locales'
 		 *
-		 * r(greeting)                             // ✅ no args needed
-		 * r(intro, { name: 'John', age: 30 })     // ✅ typed args
+		 * r(greeting)                          // ✅ no args needed
+		 * r(intro, { name: 'John', age: 30 })  // ✅ typed args
+		 * r(intro)                             // ❌ compile error: missing args
+		 * r(intro, { name: 'John', x: 1 })     // ❌ compile error: unknown key 'x'
+		 *
+		 * // route guard
+		 * router.beforeEach(() => {
+		 *   document.title = r(pageTitle)
+		 * })
+		 *
+		 * // axios interceptor
+		 * axios.interceptors.response.use(null, () => {
+		 *   toast.error(r(errorMessage))
+		 * })
 		 * ```
 		 */
 		r: t,
 		/**
-		 * Defines a translation unit. The primary string drives variable inference —
-		 * all secondary strings are validated against it at compile time.
+		 * Defines a translation unit. The primary language string drives variable
+		 * inference — all secondary strings are validated against it at compile time.
 		 *
-		 * @param dictionary - `Record<Language, string>` — One string per language. Secondary strings must use the same variables as the primary.
-		 * @returns A function that optionally accepts a generic to narrow variable types.
+		 * Call with an optional generic to narrow variable types beyond the default
+		 * `string | number`. Supports TypeScript template literal types.
+		 *
+		 * @param dictionary - `Record<Language, string>` — One string per language.
+		 * Variables are declared with `{{variableName}}` syntax. Spaces inside braces
+		 * are trimmed — `{{ name }}` and `{{name}}` are equivalent.
+		 * Secondary strings must use exactly the same variable names as the primary.
+		 * @returns A function optionally accepting a generic to narrow variable types,
+		 * which returns the translation unit.
 		 *
 		 * @example
 		 * ```ts
 		 * // no variables
-		 * const greeting = d({ en: 'Hello', zh: '你好', ja: 'こんにちは' })()
+		 * const greeting = d({ en: 'Hello', zh: '你好', ja: 'こんにちは', ms: 'Helo' })()
 		 *
-		 * // with inferred variables — defaults to Record<'name' | 'age', string | number>
+		 * // variables — inferred as Record<'name' | 'age', string | number> by default
 		 * const intro = d({
 		 *   en: 'My name is {{name}}, I am {{age}} years old.',
 		 *   zh: '我叫{{name}}，我今年{{age}}岁了。',
 		 *   ja: '私の名前は{{name}}で、{{age}}歳です。',
+		 *   ms: 'Nama saya {{name}}, saya berumur {{age}} tahun.',
 		 * })()
 		 *
-		 * // with narrowed variable types
-		 * const time = d({
+		 * // narrowed variable types via generic
+		 * const clock = d({
 		 *   en: 'Current time: {{hour}}:{{minute}}',
 		 *   zh: '现在时间：{{hour}}:{{minute}}',
 		 *   ja: '現在時刻：{{hour}}:{{minute}}',
+		 *   ms: 'Masa semasa: {{hour}}:{{minute}}',
 		 * })<{ hour: number; minute: number }>()
 		 *
-		 * // ❌ compile error — secondary string has wrong variable
-		 * const bad = d({ en: 'Hello {{name}}', zh: '你好 {{naam}}' })()
+		 * // TypeScript template literal types work too
+		 * const lastLogin = d({
+		 *   en: 'Last login: {{date}}',
+		 *   zh: '上次登录：{{date}}',
+		 *   ja: '最終ログイン：{{date}}',
+		 *   ms: 'Log masuk terakhir: {{date}}',
+		 * })<{ date: `${number}-${number}-${number}` }>()
+		 *
+		 * // ❌ compile error — 'ja' translation missing
+		 * const bad1 = d({ en: 'Hello', zh: '你好', ms: 'Helo' })()
+		 *
+		 * // ❌ compile error — secondary string has wrong variable name
+		 * const bad2 = d({ en: 'Hello {{name}}', zh: '你好 {{naam}}', ja: 'こんにちは {{name}}', ms: 'Helo {{name}}' })()
+		 *
+		 * // ❌ compile error — secondary string missing a variable
+		 * const bad3 = d({ en: '{{x}} {{y}}', zh: '{{x}}', ja: '{{x}} {{y}}', ms: '{{x}} {{y}}' })()
 		 * ```
 		 */
 		d:
