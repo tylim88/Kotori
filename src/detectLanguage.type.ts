@@ -39,6 +39,13 @@ describe('custom instance — valid', () => {
 			config: { primary: 'en', secondaries: [] },
 		})
 	})
+
+	it('accepts setLanguage that accepts wider types', () => {
+		detectLanguage({
+			setLanguage: (lang: 'en' | 'zh' | 'fr') => {},
+			config: { primary: 'en', secondaries: ['zh'] },
+		})
+	})
 })
 
 // ============================
@@ -46,10 +53,16 @@ describe('custom instance — valid', () => {
 // ============================
 
 describe('custom instance — invalid', () => {
-	it('rejects setLanguage that accepts a wider type than declared', () => {
+	it('rejects setLanguage that accepts non BCP47LanguageTagNameWithSubTag types', () => {
 		detectLanguage({
-			// @ts-expect-error setLanguage accepts string — wider than 'en' | 'zh'
+			// @ts-expect-error setLanguage reject string type
 			setLanguage: (lang: string) => {},
+			config: { primary: 'en', secondaries: ['zh'] },
+		})
+
+		detectLanguage({
+			// @ts-expect-error setLanguage reject BCP47LanguageTagNameWithSubTag type
+			setLanguage: (lang: 'en' | 'zh' | 'fr' | 'ppp') => {},
 			config: { primary: 'en', secondaries: ['zh'] },
 		})
 	})

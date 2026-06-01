@@ -68,11 +68,11 @@ export const detectLanguage = <
 		| T['config']['secondaries'][number] extends infer A
 		? {
 				setLanguage: Parameters<T['setLanguage']>[0] extends infer L
-					? L[] extends A[]
+					? L[] extends BCP47LanguageTagNameWithSubTag[]
 						? A[] extends L[]
 							? (language: L) => void
 							: 'language param does not match primary or secondaries language types'
-						: A
+						: 'language param does not match BCP47LanguageTagNameWithSubTag types'
 					: never
 				config: {
 					primary: T['config']['primary']
@@ -89,11 +89,14 @@ export const detectLanguage = <
 
 	for (const browserLang of navigator.languages as BCP47LanguageTagNameWithSubTag[]) {
 		if (languages.includes(browserLang))
+			// @ts-expect-error
 			return instance.setLanguage(browserLang)
 		if (options.fallbackToSubtag) {
 			const subtag = browserLang.split('-')[0] as BCP47LanguageTagNameWithSubTag
 
-			if (languages.includes(subtag)) return instance.setLanguage(subtag)
+			if (languages.includes(subtag))
+				// @ts-expect-error
+				return instance.setLanguage(subtag)
 		}
 	}
 }
