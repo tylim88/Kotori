@@ -288,10 +288,8 @@ kotori({ primary: 'klingon', secondaries: ['zh'] })       // ❌ compile error
 
 ## Tips
 
-- If you plan to add new languages frequently, consider colocating all your dicts in a single file or multiple files in one folder. It is easier to copy the entire file and hand it to an AI to translate.
-- If your supported languages are fixed, consider splitting dicts by page or component. Translations stay close to the code that uses them and are easier to maintain. This approach also pairs well with TypeScript — every time you add a new language, type errors will guide you to every dict that needs updating.
-- Both approaches are tree-shakeable — only the dicts imported by the current page are included in its bundle.
-- The `primary` language is the source of truth for variable inference and validation. Write your primary language strings carefully — a variable rename in the primary string becomes a compile error across every secondary language, which is intentional.
+- If you plan to add new languages frequently, consider colocating all your dicts in a single file or multiple files in one folder. It is easier to copy the entire files and hand it to an AI to translate.
+- If your supported languages are fixed, consider splitting dicts by page or component. Translations stay close to the code that uses them and are easier to maintain.
 
 ## Roadmap
 
