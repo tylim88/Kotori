@@ -5,7 +5,8 @@ export default defineConfig({
 		include: ['src/**/*.test.{ts,tsx}'],
 		coverage: {
 			enabled: true,
-			include: ['src/index.ts'],
+			include: ['src/**/*.ts'],
+			exclude: ['src/**/*.test.ts', 'src/**/*.type.ts'],
 		},
 		environment: 'happy-dom',
 		typecheck: {
