@@ -34,6 +34,8 @@ import type { BCP47LanguageTagNameWithSubTag } from './kotori'
  *
  * detectLanguage(i18n, { fallbackToSubtag: false })
  * // browser: ['zh-CN'] → no exact match → no-op, stays 'en'
+ *
+ * export const { useT, d, setLanguage } = i18n
  * ```
  *
  * @example
