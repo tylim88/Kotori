@@ -8,6 +8,9 @@
   <img src="https://img.shields.io/badge/bundle%20size-0.29kB-emerald" alt="Bundle Size">
   <a href="https://github.com/tylim88/Kotori/blob/main/LICENSE"><img src="https://img.shields.io/github/license/tylim88/Kotori?color=blue" alt="License"></a>
   <img src="https://img.shields.io/badge/dependencies-0-success" alt="Dependencies">
+  <a href="https://snyk.io/test/github/tylim88/Kotori">
+    <img src="https://snyk.io/test/github/tylim88/Kotori/badge.svg" alt="Snyk Vulnerabilities for npm package">
+  </a>
 </p>
 
 <p align="center">
