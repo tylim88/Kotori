@@ -61,7 +61,7 @@ const Component = () => {
 - Variables typed and inferred from string literals — no more string typos
 - Maximum type safety with minimum types
 
-Demo: <https://stackblitz.com/edit/kotori?file=src%2FApp.tsx>
+Demo: <https://github.com/tylim88/kotori-demo>
 
 ## Installation
 
@@ -81,7 +81,7 @@ export const { useT, d, setLanguage } = kotori({
     secondaries: ['zh', 'ja', 'ms'],
 })
 
-// you can define your dicts in the same file or separate them by component, it's up to you
+// you can define your dicts in the same file/folder or separate them by component, it's up to you
 export const intro = d({
     en: 'my name is {{name}}, I am {{age}} years old.',
     zh: '我叫{{name}}，我今年{{age}}岁了。',
@@ -248,9 +248,16 @@ Detects the user's preferred language from browser settings and sets it on the k
 
 ```ts
 import { detectLanguage } from 'kotori'
-import { i18n } from './locales'
+import { kotori } from 'kotori'
+
+const i18n = kotori({
+    primary: 'en',
+    secondaries: ['zh', 'ja', 'ms'],
+})
 
 detectLanguage(i18n)
+
+export const { useT, d, setLanguage } = i18n
 ```
 
 | option | type | default | description |
@@ -289,7 +296,8 @@ kotori({ primary: 'klingon', secondaries: ['zh'] })       // ❌ compile error
 ## Tips
 
 - If you plan to add new languages frequently, consider colocating all your dicts in a single file or multiple files in one folder. It is easier to copy the entire files and hand it to an AI to translate.
-- If your supported languages are fixed, consider splitting dicts by page or component. Translations stay close to the code that uses them and are easier to maintain.
+- If your supported languages are fixed, consider splitting dicts by page or component. This keeps translations close to the code that uses them and makes them easier to maintain.
+- For large or rarely used components, you can also reduce your bundle size by dynamically importing them only when they are needed on the page.
 
 ## Roadmap
 
