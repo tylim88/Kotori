@@ -19,7 +19,8 @@
 	"linter": {
 		"rules": {
 			"suspicious": {
-				"noArrayIndexKey": "warn"
+				"noArrayIndexKey": "warn",
+				"useIterableCallbackReturn": "off"
 			},
 			"correctness": {
 				"useExhaustiveDependencies": "warn"
