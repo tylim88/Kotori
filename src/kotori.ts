@@ -84,9 +84,16 @@ export const kotori = <
 			? []
 			: [NonNullable<ReturnType<Dictionary>[typeof _args]>]
 	) =>
-		(dictionary().d[snapshot.language] || '').replace(
+		(
+			dictionary().d[snapshot.language] +
+			// prevent potential runtime crash if user ignore type safety
+			''
+		).replace(
 			/\{\{\s*([\w-]+)\s*\}\}/g,
-			(_, key) => args[0]?.[key] as string,
+			(_, key) =>
+				args[0]?.[key] +
+				// prevent potential runtime crash if user ignore type safety
+				'',
 		)
 
 	let snapshot = { language: config.primary as Language, t }
