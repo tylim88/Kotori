@@ -86,7 +86,7 @@ export const kotori = <
 	) =>
 		(dictionary().d[snapshot.language] || '').replace(
 			/\{\{\s*([\w-]+)\s*\}\}/g,
-			(_, key) => String(args[0]?.[key]),
+			(_, key) => args[0]?.[key] as string,
 		)
 
 	let snapshot = { language: config.primary as Language, t }
@@ -119,18 +119,14 @@ export const kotori = <
 	const setLanguage = (language: Language) => {
 		snapshot = {
 			language,
-			//@ts-expect-error
+			//@ts-expect-error type doesn't matter here, we just want to return new functions reference
 			t: (...args) => t(...args),
 		}
-		listeners.forEach((listener) => {
-			listener()
-		})
+		listeners.forEach((listener) => listener())
 	}
 	const subscribe = (listener: () => void) => {
 		listeners.add(listener)
-		return () => {
-			listeners.delete(listener)
-		}
+		return () => listeners.delete(listener)
 	}
 
 	return {
