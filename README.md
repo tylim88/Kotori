@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/kotori"><img src="https://img.shields.io/npm/v/kotori?color=blue" alt="NPM Version"></a>
   <a href="https://codecov.io/gh/tylim88/Kotori"><img src="https://img.shields.io/codecov/c/github/tylim88/Kotori?branch=main" alt="Coverage"></a>
-  <img src="https://img.shields.io/badge/bundle%20size-0.29kB-emerald" alt="Bundle Size">
+  <img src="https://img.shields.io/badge/bundle%20size-0.28kB-emerald" alt="Bundle Size">
   <a href="https://github.com/tylim88/Kotori/blob/main/LICENSE"><img src="https://img.shields.io/github/license/tylim88/Kotori?color=blue" alt="License"></a>
   <img src="https://img.shields.io/badge/dependencies-0-success" alt="Dependencies">
   <a href="https://snyk.io/test/github/tylim88/Kotori">
@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-🕊️ Kotori is a zero-config, fully type-safe, and modular internationalization library for React that compiles down to just 0.29kB. No JSON, no external CLI tools, no codegen—just live type inference from your strings.
+🕊️ Kotori is a zero-config, fully type-safe, and modular internationalization library for React that compiles down to just 0.28kB. No JSON, no external CLI tools, no codegen—just live type inference from your strings.
 </p>
 
 ```ts
@@ -58,7 +58,7 @@ const Component = () => {
 - No JSON
 - No dependencies
 - No build step
-- 0.29kB minified and gzipped
+- 0.28kB minified and gzipped
 - Modular and tree-shakeable
 - Language change in one page rerenders all pages
 - Variables typed and inferred from string literals — no more string typos
@@ -166,7 +166,7 @@ export const Page2 = () => {
 
 ![how kotori works](image.webp) 
 
-### `kotori(options)` (0.29kB)
+### `kotori(options)` (0.28kB)
 
 Creates a scoped i18n instance.
 
