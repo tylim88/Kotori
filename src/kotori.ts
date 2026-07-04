@@ -41,6 +41,7 @@ declare const _args: unique symbol
  *   secondaries: ['zh', 'ja', 'ms'],
  * })
  * ```
+ * @see {@link https://github.com/tylim88/Kotori#kotorioptions-028kb}
  */
 export const kotori = <
 	const Primary extends BCP47LanguageTagNameWithSubTag,
@@ -52,25 +53,6 @@ export const kotori = <
 	const listeners = new Set<() => void>()
 	type Language = Primary | Secondary
 
-	/**
-	 * Translates a dict to the current language and interpolates variables.
-	 *
-	 * @param dictionary - A dict created by `d()`.
-	 * @param args - `Record<string, string | number>` — Variable values to interpolate. Required if the dict has variables, omitted if it doesn't.
-	 * @returns `string` — The translated and interpolated string.
-	 *
-	 * @example
-	 * const Intro = () => {
-	 *     const { t } = useT()
-	 *
-	 *     return (
-	 *         <p>{t(greeting)}</p>                             // ✅ no args needed
-	 *         <p>{t(intro, { name: 'John', age: 30 })}</p>     // ✅ typed args
-	 *         <p>{t(intro)}</p>                                // ❌ compile error: missing args
-	 *         <p>{t(intro, { name: 'John', x: 30 })}</p>       // ❌ compile error: unknown key 'x'
-	 *     )
-	 * }
-	 */
 	const t = <
 		Dictionary extends () => Readonly<{
 			d: Record<Language, string>
@@ -98,31 +80,6 @@ export const kotori = <
 
 	let snapshot = { language: config.primary as Language, t }
 
-	/**
-	 * Updates the current language and triggers a rerender in all active
-	 * `useT()` consumers across all pages. Safe to call outside React.
-	 *
-	 * @param language - `Language` — Must be one of the tags declared in
-	 * `primary` or `secondaries`. Any other value is a compile error.
-	 * @returns `void`
-	 *
-	 * @example
-	 * ```ts
-	 * import { setLanguage } from './locales'
-	 *
-	 * setLanguage('zh')      // ✅
-	 * setLanguage('ms')      // ✅
-	 * setLanguage('de')      // ❌ compile error: 'de' was not declared
-	 *
-	 * // persist and restore language selection
-	 * setLanguage('zh')
-	 * localStorage.setItem('lang', 'zh')
-	 *
-	 * // restore on app startup
-	 * const saved = localStorage.getItem('lang')
-	 * if (saved) setLanguage(saved as 'en')
-	 * ```
-	 */
 	const setLanguage = (language: Language) => {
 		snapshot = {
 			language,
@@ -138,6 +95,10 @@ export const kotori = <
 
 	return {
 		config,
+		/**
+		 * Updates the current language and triggers a rerender in all active
+		 * `useT()` consumers across all pages. Safe to call outside React.
+		 */
 		setLanguage,
 		/**
 		 * Translates a dict to the current language and interpolates variables.
@@ -148,31 +109,6 @@ export const kotori = <
 		 * the result permanently since `r` is a stable module-level reference,
 		 * causing stale translations after a language change. Use `t` from `useT()`
 		 * inside components instead.
-		 *
-		 * @param dictionary - A dict created by `d()`.
-		 * @param args - `Record<string, string | number>` — Variable values to interpolate.
-		 * Required if the dict has variables, omitted if it doesn't.
-		 * @returns `string` — The translated and interpolated string in the current language.
-		 *
-		 * @example
-		 * ```ts
-		 * import { r, greeting, intro } from './locales'
-		 *
-		 * r(greeting)                          // ✅ no args needed
-		 * r(intro, { name: 'John', age: 30 })  // ✅ typed args
-		 * r(intro)                             // ❌ compile error: missing args
-		 * r(intro, { name: 'John', x: 1 })     // ❌ compile error: unknown key 'x'
-		 *
-		 * // route guard
-		 * router.beforeEach(() => {
-		 *   document.title = r(pageTitle)
-		 * })
-		 *
-		 * // axios interceptor
-		 * axios.interceptors.response.use(null, () => {
-		 *   toast.error(r(errorMessage))
-		 * })
-		 * ```
 		 */
 		r: t,
 		/**
@@ -181,52 +117,6 @@ export const kotori = <
 		 *
 		 * Call with an optional generic to narrow variable types beyond the default
 		 * `string | number`. Supports TypeScript template literal types.
-		 *
-		 * @param dictionary - `Record<Language, string>` — One string per language.
-		 * Variables are declared with `{{variableName}}` syntax. Spaces inside braces
-		 * are trimmed — `{{ name }}` and `{{name}}` are equivalent.
-		 * Secondary strings must use exactly the same variable names as the primary.
-		 * @returns A function optionally accepting a generic to narrow variable types,
-		 * which returns the translation unit.
-		 *
-		 * @example
-		 * ```ts
-		 * // no variables
-		 * const greeting = d({ en: 'Hello', zh: '你好', ja: 'こんにちは', ms: 'Helo' })()
-		 *
-		 * // variables — inferred as Record<'name' | 'age', string | number> by default
-		 * const intro = d({
-		 *   en: 'My name is {{name}}, I am {{age}} years old.',
-		 *   zh: '我叫{{name}}，我今年{{age}}岁了。',
-		 *   ja: '私の名前は{{name}}で、{{age}}歳です。',
-		 *   ms: 'Nama saya {{name}}, saya berumur {{age}} tahun.',
-		 * })()
-		 *
-		 * // narrowed variable types via generic
-		 * const clock = d({
-		 *   en: 'Current time: {{hour}}:{{minute}}',
-		 *   zh: '现在时间：{{hour}}:{{minute}}',
-		 *   ja: '現在時刻：{{hour}}:{{minute}}',
-		 *   ms: 'Masa semasa: {{hour}}:{{minute}}',
-		 * })<{ hour: number; minute: number }>()
-		 *
-		 * // TypeScript template literal types work too
-		 * const lastLogin = d({
-		 *   en: 'Last login: {{date}}',
-		 *   zh: '上次登录：{{date}}',
-		 *   ja: '最終ログイン：{{date}}',
-		 *   ms: 'Log masuk terakhir: {{date}}',
-		 * })<{ date: `${number}-${number}-${number}` }>()
-		 *
-		 * // ❌ compile error — 'ja' translation missing
-		 * const bad1 = d({ en: 'Hello', zh: '你好', ms: 'Helo' })()
-		 *
-		 * // ❌ compile error — secondary string has wrong variable name
-		 * const bad2 = d({ en: 'Hello {{name}}', zh: '你好 {{naam}}', ja: 'こんにちは {{name}}', ms: 'Helo {{name}}' })()
-		 *
-		 * // ❌ compile error — secondary string missing a variable
-		 * const bad3 = d({ en: '{{x}} {{y}}', zh: '{{x}}', ja: '{{x}} {{y}}', ms: '{{x}} {{y}}' })()
-		 * ```
 		 */
 		d:
 			<
@@ -265,27 +155,6 @@ export const kotori = <
 		 *
 		 * Call in every component that renders translated strings.
 		 * When `setLanguage` is called anywhere, all `useT()` consumers rerender.
-		 *
-		 * @returns `{ language: Language, t: TranslateFunction }`
-		 * @returns `language` - `Language` — The current active language tag as a reactive value.
-		 * @returns `t` - `TranslateFunction` — React Compiler-safe translate function. Use this inside components instead of the instance-level `t`.
-		 *
-		 * @example
-		 * ```tsx
-		 * import { useT, intro, time } from './locales'
-		 *
-		 * const Page = () => {
-		 *   const { t, language } = useT()
-		 *
-		 *   return (
-		 *     <>
-		 *       <p>{t(intro, { name: 'John', age: 30 })}</p>
-		 *       <p>{t(time, { hour: 12, minute: 0 })}</p>
-		 *       <p>Current language: {language}</p>
-		 *     </>
-		 *   )
-		 * }
-		 * ```
 		 */
 		useT: () =>
 			useSyncExternalStore(
