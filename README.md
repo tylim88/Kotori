@@ -166,7 +166,9 @@ export const Page2 = () => {
 
 ![how kotori works](image.webp) 
 
-### `kotori(options)` (0.28kB)
+### `kotori(options)`
+
+<small>size: 0.28kB</small>
 
 Creates a scoped i18n instance.
 
@@ -245,7 +247,9 @@ const Intro = () => {
 }
 ```
 
-### `detectLanguage(instance, options?)` (0.12kB with Kotori or 0.2kB standalone)
+### `detectLanguage(instance, options?)`
+
+<small>size: 0.12kB</small>
 
 Detects the user's preferred language from browser settings and sets it on the kotori instance. Iterates through the user's full language preference list in order, stopping at the first match.
 

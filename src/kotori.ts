@@ -41,7 +41,7 @@ declare const _args: unique symbol
  *   secondaries: ['zh', 'ja', 'ms'],
  * })
  * ```
- * @see {@link https://github.com/tylim88/Kotori#kotorioptions-028kb}
+ * @see {@link https://github.com/tylim88/Kotori#kotorioptions}
  */
 export const kotori = <
 	const Primary extends BCP47LanguageTagNameWithSubTag,
