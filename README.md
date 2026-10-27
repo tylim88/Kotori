@@ -64,7 +64,7 @@ const Component = () => {
 - Variables typed and inferred from string literals — no more string typos
 - Maximum type safety with minimum types
 
-Demo: <https://github.com/tylim88/kotori-demo>
+Demo: <https://stackblitz.com/edit/kotori?file=src%2FApp.tsx>
 
 ## Installation
 
